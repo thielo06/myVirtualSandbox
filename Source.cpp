@@ -13,10 +13,10 @@ int __stdcall wWinMain(
     _In_ LPWSTR lpCmdLine,
     _In_ int nShowCmd
 ) {
-    /* A window class defines a set of behaviors that several windows 
-     * might have in common. Every window must be associated with a 
-     * window class. To register a window class, fill in a "WNDCLASS" 
-     * structure and call "RegisterClass" function afterwards.*/
+    // A window class defines a set of behaviors that several windows 
+    // might have in common. Every window must be associated with a 
+    // window class. To register a window class, fill in a "WNDCLASS" 
+    // structure and call "RegisterClass" function afterwards.
     const wchar_t CLASS_NAME[] = L"myVirtualSandbox Window Class";
 
     BOOL useDarkMode;
@@ -90,27 +90,25 @@ LRESULT CALLBACK wndProc(
             return 0;
         }
 
-        /* To paint the window the "WM_PAINT" message has to be 
-         * received by the window. It is sent by either the program 
-         * itself or the operating system.*/
+        // To paint the window the "WM_PAINT" message has to be 
+        // received by the window. It is sent by either the program 
+        // itself or the operating system.
         case WM_PAINT:
         {
-            /* The "rcPaint" member of the "PAINTSTRCUT" structure 
-             * returns a "RECT" structure that specifies the upper 
-             * left and lower right corners of the rectangle in wich 
-             * the painting is requested.*/
+            // The "rcPaint" member of the "PAINTSTRCUT" structure 
+            // returns a "RECT" structure that specifies the upper 
+            // left and lower right corners of the rectangle in wich 
+            // the painting is requested.
             PAINTSTRUCT paintStruct;
             HDC hDeviceContext;
-
-            ColorPalette myColors;
 
             HBRUSH hBackgroundColorBrush, hElevatedColorBrush, hFrameColorBrush;
             
             hDeviceContext = BeginPaint(hWnd, &paintStruct);
 
-            hBackgroundColorBrush = CreateSolidBrush(myColors.BackgroundColorDarkTheme);
-            hElevatedColorBrush = CreateSolidBrush(myColors.ElevatedColorDarkTheme);
-            hFrameColorBrush = CreateSolidBrush(myColors.FrameColorDarkTheme);
+            hBackgroundColorBrush = CreateSolidBrush(MyColors.BackgroundColorDarkTheme);
+            hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+            hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
 
             FillRect(
                 hDeviceContext,
@@ -119,12 +117,12 @@ LRESULT CALLBACK wndProc(
             );
             FillRect(
                 hDeviceContext,
-                &CanvasArea,
+                &MyRectangles.CanvasArea,
                 hElevatedColorBrush
             );
             FrameRect(
                 hDeviceContext,
-                &CanvasFrame,
+                &MyRectangles.CanvasFrame,
                 hFrameColorBrush
             );
 
@@ -137,8 +135,8 @@ LRESULT CALLBACK wndProc(
             return 0;
         }
 
-        /* When the mouse moves over a window, the window receives a 
-         * "WM_SETCURSOR" message.*/
+        // When the mouse moves over a window, the window receives a 
+        // "WM_SETCURSOR" message.
         case WM_SETCURSOR:
         {
             HCURSOR cursor;
@@ -157,6 +155,14 @@ LRESULT CALLBACK wndProc(
                     value = IDC_SIZENWSE;
                     break;
                 }
+                case HTLEFT: {
+                    value = IDC_SIZEWE;
+                    break;
+                }
+                case HTRIGHT: {
+                    value = IDC_SIZEWE;
+                    break;
+                }
                 case HTTOP: {
                     value = IDC_SIZENS;
                     break;
@@ -167,14 +173,6 @@ LRESULT CALLBACK wndProc(
                 }
                 case HTTOPRIGHT: {
                     value = IDC_SIZENESW;
-                    break;
-                }
-                case HTLEFT: {
-                    value = IDC_SIZEWE;
-                    break;
-                }
-                case HTRIGHT: {
-                    value = IDC_SIZEWE;
                     break;
                 }
                 default: value = IDC_ARROW;
@@ -190,17 +188,14 @@ LRESULT CALLBACK wndProc(
         case WM_LBUTTONDOWN:
         {
             POINT pt;
-            ColorPalette myColors;
 
-            pt = {
-                LOWORD(lParam),
-                HIWORD(lParam)
-            };
+            pt.x = GET_X_LPARAM(lParam);
+            pt.y = GET_Y_LPARAM(lParam);
 
-            /* In case that the mouse is within the canvas area, the 
-             * "DrawPoint" function is called.*/
-            if (RectContains(CanvasArea, pt)) {
-                DrawPoint(hWnd, pt, myColors.AccentColorDarkTheme);
+            // In case that the mouse is within the canvas area, the 
+            // "DrawPoint" function is called.
+            if (Contains(MyRectangles.CanvasArea, pt)) {
+                DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
             }
 
             return 0;
