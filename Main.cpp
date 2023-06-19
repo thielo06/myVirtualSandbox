@@ -1,5 +1,8 @@
 #include "Header.h"
 
+#include "ColorPalette.h"
+#include "Forms.h"
+
 LRESULT CALLBACK wndProc(
     HWND hWnd,
     UINT uMsg,
@@ -115,16 +118,25 @@ LRESULT CALLBACK wndProc(
                 &paintStruct.rcPaint,
                 hBackgroundColorBrush
             );
-            FillRect(
-                hDeviceContext,
-                &MyRectangles.CanvasArea,
-                hElevatedColorBrush
-            );
-            FrameRect(
-                hDeviceContext,
-                &MyRectangles.CanvasFrame,
-                hFrameColorBrush
-            );
+            
+            for (int i = 0; i < MyForms.arraySize; i++) {
+                Forms::rectangle rectangle;
+                HBRUSH hBrush;
+
+                rectangle = MyForms.allRectangles[i];
+                hBrush = CreateSolidBrush(rectangle.color);
+                
+                FillRect(
+                    hDeviceContext,
+                    &rectangle.rectangle,
+                    hElevatedColorBrush
+                );
+                FrameRectangle(
+                    hDeviceContext,
+                    rectangle.rectangle,
+                    hFrameColorBrush
+                );
+            }
 
             DeleteObject(hBackgroundColorBrush);
             DeleteObject(hElevatedColorBrush);
@@ -194,7 +206,7 @@ LRESULT CALLBACK wndProc(
 
             // In case that the mouse is within the canvas area, the 
             // "DrawPoint" function is called.
-            if (Contains(MyRectangles.CanvasArea, pt)) {
+            if (Contains(MyForms.Canvas.rectangle, pt)) {
                 DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
             }
 
