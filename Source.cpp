@@ -85,7 +85,7 @@ LRESULT CALLBACK wndProc(
     {   
         case WM_DESTROY:
         {
-            PostQuitMessage(wParam);
+            PostQuitMessage(0);
 
             return 0;
         }
