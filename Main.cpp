@@ -1,8 +1,5 @@
 #include "Header.h"
 
-#include "ColorPalette.h"
-#include "Forms.h"
-
 LRESULT CALLBACK wndProc(
     HWND hWnd,
     UINT uMsg,
@@ -108,7 +105,7 @@ LRESULT CALLBACK wndProc(
             HBRUSH hBackgroundColorBrush, hElevatedColorBrush, hFrameColorBrush;
             
             hDeviceContext = BeginPaint(hWnd, &paintStruct);
-
+            
             hBackgroundColorBrush = CreateSolidBrush(MyColors.BackgroundColorDarkTheme);
             hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
             hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);

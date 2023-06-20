@@ -122,6 +122,8 @@
       <ConformanceMode>Default</ConformanceMode>
       <CompileAsManaged>true</CompileAsManaged>
       <PreprocessToFile>false</PreprocessToFile>
+      <ScanSourceForModuleDependencies>
+      </ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,9 +153,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="UiLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h" />
+    <ClInclude Include="UiLayout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
