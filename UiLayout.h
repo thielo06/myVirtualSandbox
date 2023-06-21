@@ -4,7 +4,7 @@
 
 // Structure that defines a color palette. See 
 // https://colorhunt.co/palette/525252414141313131ca3e47 for more information.
-class ColorPalette
+static class ColorPalette
 {
 public:
     COLORREF BackgroundColorDarkTheme, ElevatedColorDarkTheme, FrameColorDarkTheme, AccentColorDarkTheme;
@@ -13,7 +13,7 @@ public:
 } MyColors;
 
 // Class that defines all rectangles within the client area.
-class Forms
+static class Forms
 {
 public:
     struct rectangle {

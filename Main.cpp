@@ -1,4 +1,6 @@
+#include "AppFunctions.h"
 #include "Header.h"
+#include "UiLayout.h"
 
 LRESULT CALLBACK wndProc(
     HWND hWnd,
@@ -128,7 +130,7 @@ LRESULT CALLBACK wndProc(
                     &rectangle.rectangle,
                     hElevatedColorBrush
                 );
-                FrameRectangle(
+                AppFunctions::FrameRectangle(
                     hDeviceContext,
                     rectangle.rectangle,
                     hFrameColorBrush
@@ -203,8 +205,8 @@ LRESULT CALLBACK wndProc(
 
             // In case that the mouse is within the canvas area, the 
             // "DrawPoint" function is called.
-            if (Contains(MyForms.Canvas.rectangle, pt)) {
-                DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
+            if (AppFunctions::Contains(MyForms.Canvas.rectangle, pt)) {
+                AppFunctions::DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
             }
 
             return 0;

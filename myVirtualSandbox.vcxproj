@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
   </PropertyGroup>
@@ -152,10 +152,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppFunctions.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="UiLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppFunctions.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="UiLayout.h" />
   </ItemGroup>
