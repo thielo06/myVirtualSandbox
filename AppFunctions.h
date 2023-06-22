@@ -2,12 +2,11 @@
 
 #include "Header.h"
 
-class AppFunctions
+namespace AppFunctions
 {
-public:
-    static void FrameRectangle(HDC hDeviceContext, RECT rectangle, HBRUSH hBrush);
+    void FrameRectangle(HDC hDeviceContext, RECT rectangle, HBRUSH hBrush);
 
-    static void DrawPoint(HWND hWnd, POINT pt, COLORREF penColor);
+    void DrawPoint(HWND hWnd, POINT pt, COLORREF penColor);
 
-    static bool Contains(RECT rect, POINT pt);
+    bool Contains(RECT rect, POINT pt);
 };
