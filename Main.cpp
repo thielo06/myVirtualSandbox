@@ -118,7 +118,7 @@ LRESULT CALLBACK wndProc(
                 hBackgroundColorBrush
             );
             
-            for (int i = 0; i < MyForms.arraySize; i++) {
+            for (int i = 0; i < MyForms.allRectangles.size(); i++) {
                 Forms::rectangle rectangle;
                 HBRUSH hBrush;
 

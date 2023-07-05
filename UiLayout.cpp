@@ -19,7 +19,7 @@ Forms::Forms() {
         CANVAS_VER_OFFSET + CANVAS_HEIGHT
     };
     Canvas.color = MyColors.ElevatedColorDarkTheme;
-    allRectangles[0] = Canvas;
+    allRectangles.push_back(Canvas);
 
     Button1.rectangle = {
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + 10,
@@ -28,7 +28,7 @@ Forms::Forms() {
         CANVAS_VER_OFFSET + BUTTON_1_HEIGTH
     };
     Button1.color = MyColors.ElevatedColorDarkTheme;
-    allRectangles[1] = Button1;
+    allRectangles.push_back(Button1);
 
     Button2.rectangle = {
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + 10,
@@ -37,5 +37,5 @@ Forms::Forms() {
         CANVAS_VER_OFFSET + BUTTON_1_HEIGTH + 10 + BUTTON_1_HEIGTH
     };
     Button2.color = MyColors.ElevatedColorDarkTheme;
-    allRectangles[2] = Button2;
+    allRectangles.push_back(Button2);
 }
