@@ -14,5 +14,5 @@ const int CANVAS_HOR_OFFSET = 10;
 const int CANVAS_WIDTH = 640;
 const int CANVAS_HEIGHT = 480;
 
-const int BUTTON_1_WIDTH = 100;
-const int BUTTON_1_HEIGTH = 30;
+const int BUTTON_WIDTH = 100;
+const int BUTTON_HEIGTH = 30;

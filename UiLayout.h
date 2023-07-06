@@ -4,7 +4,8 @@
 #include <vector>
 
 // Structure that defines a color palette. See 
-// https://colorhunt.co/palette/525252414141313131ca3e47 for more information.
+// https://colorhunt.co/palette/525252414141313131ca3e47 for more 
+// information.
 static class ColorPalette
 {
 public:
@@ -13,18 +14,21 @@ public:
     ColorPalette();
 } MyColors;
 
-// Class that defines all rectangles within the client area.
-static class Forms
+// Class that stores data of user interface objects within the client 
+// area.
+static class UiObjects
 {
 public:
-    struct rectangle {
+    struct Object {
         RECT rectangle;
         COLORREF color;
+        LPWSTR objectText;
+        int objectType; // 1: Button
     };
 
-    rectangle Canvas, Button1, Button2;
+    Object Canvas, Button1, Button2, Button3;
 
-    std::vector<rectangle> allRectangles;
+    std::vector<Object> Objects;
 
-    Forms();
-} MyForms;
+    UiObjects();
+} MyUiObjects;

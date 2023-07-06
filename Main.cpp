@@ -84,10 +84,92 @@ LRESULT CALLBACK wndProc(
     LPARAM lParam
 ) {
     switch (uMsg)
-    {   
+    {
+        case WM_CREATE:
+        {
+            // The following loop iterates through the container of user 
+            // interface objects and if the object is of button type then
+            // it is added to the user interface.
+            for (int i = 0; i < MyUiObjects.Objects.size(); i++) {
+                UiObjects::Object UiObject = MyUiObjects.Objects[i];
+
+                switch (UiObject.objectType) {
+                case 1: // Button
+                {
+                    HWND hButtonWnd;
+                    HBRUSH hBrush;
+                    
+                    hBrush = CreateSolidBrush(UiObject.color);
+
+                    hButtonWnd = CreateWindowEx(
+                        0,
+                        L"BUTTON", // Predefined class; Unicode assumed 
+                        UiObject.objectText, // Button text 
+                        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_OWNERDRAW, // Styles 
+                        UiObject.rectangle.left, // x position 
+                        UiObject.rectangle.top, // y position 
+                        BUTTON_WIDTH, // Button width
+                        BUTTON_HEIGTH, // Button height
+                        hWnd, // Parent window
+                        NULL, // No menu.
+                        (HINSTANCE)GetWindowLong(hWnd, GWLP_HINSTANCE),
+                        NULL // Pointer not needed.
+                    );
+
+                    DeleteObject(hBrush);
+                }
+                }
+            }
+            return 0;
+        }
         case WM_DESTROY:
         {
             PostQuitMessage(0);
+
+            return 0;
+        }
+
+        case WM_DRAWITEM:
+        {
+            LPDRAWITEMSTRUCT itemStructure;
+            HBRUSH hBackgroundColorBrush, hElevatedColorBrush, hFrameColorBrush;
+            LPWSTR lpBuffer;
+
+            itemStructure = (LPDRAWITEMSTRUCT)lParam;
+
+            hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+            hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
+
+            if (itemStructure->itemState & ODS_SELECTED) {
+                FillRect(
+                    itemStructure->hDC,
+                    &itemStructure->rcItem,
+                    hFrameColorBrush
+                );
+            }
+            else {
+                FillRect(
+                    itemStructure->hDC,
+                    &itemStructure->rcItem,
+                    hElevatedColorBrush
+                );
+            }
+
+            int length;
+            length = GetWindowTextLength(itemStructure->hwndItem);
+
+            lpBuffer = new wchar_t[length + 1];
+            GetWindowTextW(itemStructure->hwndItem, lpBuffer, length + 1);
+            DrawText(
+                itemStructure->hDC,
+                lpBuffer,
+                length,
+                &itemStructure->rcItem,
+                DT_CENTER
+            );
+
+            DeleteObject(hElevatedColorBrush);
+            DeleteObject(hFrameColorBrush);
 
             return 0;
         }
@@ -117,25 +199,17 @@ LRESULT CALLBACK wndProc(
                 &paintStruct.rcPaint,
                 hBackgroundColorBrush
             );
-            
-            for (int i = 0; i < MyForms.allRectangles.size(); i++) {
-                Forms::rectangle rectangle;
-                HBRUSH hBrush;
-
-                rectangle = MyForms.allRectangles[i];
-                hBrush = CreateSolidBrush(rectangle.color);
                 
-                FillRect(
-                    hDeviceContext,
-                    &rectangle.rectangle,
-                    hElevatedColorBrush
-                );
-                AppFunctions::FrameRectangle(
-                    hDeviceContext,
-                    rectangle.rectangle,
-                    hFrameColorBrush
-                );
-            }
+            FillRect(
+                hDeviceContext,
+                &MyUiObjects.Canvas.rectangle,
+                hElevatedColorBrush
+            );
+            AppFunctions::FrameRectangle(
+                hDeviceContext,
+                MyUiObjects.Canvas.rectangle,
+                hFrameColorBrush
+            );
 
             DeleteObject(hBackgroundColorBrush);
             DeleteObject(hElevatedColorBrush);
@@ -205,7 +279,7 @@ LRESULT CALLBACK wndProc(
 
             // In case that the mouse is within the canvas area, the 
             // "DrawPoint" function is called.
-            if (AppFunctions::Contains(MyForms.Canvas.rectangle, pt)) {
+            if (AppFunctions::Contains(MyUiObjects.Canvas.rectangle, pt)) {
                 AppFunctions::DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
             }
 
