@@ -96,8 +96,8 @@ LRESULT CALLBACK wndProc(
                 switch (UiObject.objectType) {
                 case 1: // Button
                 {
-                    HWND hButtonWnd;
                     HBRUSH hBrush;
+                    HWND hButtonWnd;
                     
                     hBrush = CreateSolidBrush(UiObject.color);
 
@@ -105,14 +105,17 @@ LRESULT CALLBACK wndProc(
                         0,
                         L"BUTTON", // Predefined class; Unicode assumed 
                         UiObject.objectText, // Button text 
-                        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_OWNERDRAW, // Styles 
+                        // With the 'BS_OWNERDRAW'-Option the owner 
+                        // window receives a 'WM_DRAWITEM'-Message when
+                        // a visual aspect of the button has changed.
+                        WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW, // Styles 
                         UiObject.rectangle.left, // x position 
                         UiObject.rectangle.top, // y position 
                         BUTTON_WIDTH, // Button width
                         BUTTON_HEIGTH, // Button height
                         hWnd, // Parent window
                         NULL, // No menu.
-                        (HINSTANCE)GetWindowLong(hWnd, GWLP_HINSTANCE),
+                        (HINSTANCE)GetModuleHandle(NULL),
                         NULL // Pointer not needed.
                     );
 
@@ -131,42 +134,78 @@ LRESULT CALLBACK wndProc(
 
         case WM_DRAWITEM:
         {
+            HBRUSH hElevatedColorBrush, hFrameColorBrush;
+            HDC hDeviceContext;
+            HFONT hItemFont, hOldItemFont;
+            HWND hItemWnd;
+            int itemState;
             LPDRAWITEMSTRUCT itemStructure;
-            HBRUSH hBackgroundColorBrush, hElevatedColorBrush, hFrameColorBrush;
             LPWSTR lpBuffer;
+            RECT itemRectangle;
 
+            // The 'lparam'-Parameter of 'WM_DRAWITEM'-Message holds
+            // a pointer to a 'DRAWITEMSTRUCT'-Structure wich provides
+            // informations to the owner window on how to paint the 
+            // control or menu-item.
             itemStructure = (LPDRAWITEMSTRUCT)lParam;
+
+            hDeviceContext = itemStructure->hDC;
+            hItemWnd = itemStructure->hwndItem;
+            itemRectangle = itemStructure->rcItem;
+            itemState = itemStructure->itemState;
 
             hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
             hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
 
-            if (itemStructure->itemState & ODS_SELECTED) {
+            if (itemState & ODS_SELECTED) {
                 FillRect(
-                    itemStructure->hDC,
-                    &itemStructure->rcItem,
+                    hDeviceContext,
+                    &itemRectangle,
                     hFrameColorBrush
                 );
             }
             else {
                 FillRect(
-                    itemStructure->hDC,
-                    &itemStructure->rcItem,
+                    hDeviceContext,
+                    &itemRectangle,
                     hElevatedColorBrush
                 );
             }
 
             int length;
-            length = GetWindowTextLength(itemStructure->hwndItem);
+            length = GetWindowTextLength(hItemWnd);
 
             lpBuffer = new wchar_t[length + 1];
-            GetWindowTextW(itemStructure->hwndItem, lpBuffer, length + 1);
+            GetWindowText(hItemWnd, lpBuffer, length + 1);
+
+            hItemFont = CreateFont(
+                15,
+                0,
+                0, 
+                0, 
+                FW_DONTCARE,
+                false, // bItalic
+                false, // bUnderline
+                false, // bStrikeOut
+                DEFAULT_CHARSET,
+                OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DRAFT_QUALITY, VARIABLE_PITCH,
+                L"Arial"
+            );
+
+            hOldItemFont = (HFONT)SelectObject(hDeviceContext, hItemFont);
+
+            SetTextColor(hDeviceContext, MyColors.TextColorDarkTheme);
+            SetBkMode(hDeviceContext, TRANSPARENT);
             DrawText(
-                itemStructure->hDC,
+                hDeviceContext,
                 lpBuffer,
                 length,
-                &itemStructure->rcItem,
-                DT_CENTER
+                &itemRectangle,
+                DT_CENTER | DT_VCENTER | DT_SINGLELINE
             );
+
+            SelectObject(hDeviceContext, hOldItemFont);
+            DeleteObject(hItemFont);
 
             DeleteObject(hElevatedColorBrush);
             DeleteObject(hFrameColorBrush);

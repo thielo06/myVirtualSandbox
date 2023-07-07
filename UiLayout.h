@@ -4,12 +4,13 @@
 #include <vector>
 
 // Structure that defines a color palette. See 
-// https://colorhunt.co/palette/525252414141313131ca3e47 for more 
+// https://colorhunt.co/palette/525252414141313131ca3e47 and 
+// https://colorhunt.co/palette/f8f8f8faebcdf7c873434343 for more 
 // information.
 static class ColorPalette
 {
 public:
-    COLORREF BackgroundColorDarkTheme, ElevatedColorDarkTheme, FrameColorDarkTheme, AccentColorDarkTheme;
+    COLORREF TextColorDarkTheme, BackgroundColorDarkTheme, ElevatedColorDarkTheme, FrameColorDarkTheme, AccentColorDarkTheme;
 
     ColorPalette();
 } MyColors;
@@ -26,7 +27,7 @@ public:
         int objectType; // 1: Button
     };
 
-    Object Canvas, Button1, Button2, Button3;
+    Object Canvas, Button1, Button2;
 
     std::vector<Object> Objects;
 

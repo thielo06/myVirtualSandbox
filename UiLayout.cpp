@@ -2,6 +2,8 @@
 #include "UiLayout.h"
 
 ColorPalette::ColorPalette() {
+    TextColorDarkTheme = RGB(248, 248, 248);
+
     BackgroundColorDarkTheme = RGB(65, 65, 65);
 
     ElevatedColorDarkTheme = RGB(49, 49, 49);
@@ -50,19 +52,5 @@ UiObjects::UiObjects() {
     Button2.objectType = 1;
 
     Objects.push_back(Button2);
-    #pragma endregion
-
-    #pragma region Button2
-    Button3.rectangle = {
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH + 10 + BUTTON_WIDTH + 10,
-        CANVAS_VER_OFFSET,
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH,
-        CANVAS_VER_OFFSET 
-    };
-    Button3.color = MyColors.ElevatedColorDarkTheme;
-    Button3.objectText = L"Button3";
-    Button3.objectType = 1;
-
-    Objects.push_back(Button3);
     #pragma endregion
 }
