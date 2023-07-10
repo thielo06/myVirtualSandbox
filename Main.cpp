@@ -25,7 +25,7 @@ int __stdcall wWinMain(
     const wchar_t CLASS_NAME[] = L"myVirtualSandbox Window Class";
 
     BOOL useDarkMode;
-    HWND hWnd;
+    HWND hApplicationWnd;
     MSG msg = { };
     // A window class defines a set of behaviors that several windows 
     // might have in common. Every window must be associated with a 
@@ -40,8 +40,7 @@ int __stdcall wWinMain(
     RegisterClass(&applicationWndClass);
 
     // Create the window.
-    hWnd = CreateWindowEx(
-        0,                              // Optional window styles.
+    hApplicationWnd = CreateWindow(
         CLASS_NAME,                     // Window class
         L"Learn to Program Windows",    // Window text
         WS_OVERLAPPEDWINDOW,            // Window style
@@ -53,7 +52,7 @@ int __stdcall wWinMain(
         NULL        // Additional application data
     );
 
-    if (hWnd == NULL)
+    if (hApplicationWnd == NULL)
     {
         return 0;
     }
@@ -65,13 +64,13 @@ int __stdcall wWinMain(
     useDarkMode = TRUE;
 
     DwmSetWindowAttribute(
-        hWnd,
+        hApplicationWnd,
         DWMWA_USE_IMMERSIVE_DARK_MODE,
         &useDarkMode,
         sizeof(useDarkMode)
     );
 
-    ShowWindow(hWnd, nShowCmd);
+    ShowWindow(hApplicationWnd, nShowCmd);
 
     while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
@@ -90,6 +89,37 @@ LRESULT CALLBACK wndProc(
 ) {
     switch (uMsg)
     {
+        // The following message is sent among others when a control 
+        // like a button sends a notification message to its parent 
+        // window.
+        // In case this message is actually sent by a control, its low-
+        // order word of the word parameter stores the control identifier
+        // wich is set on object initialization with the "hMenu"-
+        // Parameter.
+        case WM_COMMAND:
+        {
+            DWORD controlIdentifier;
+
+            controlIdentifier = LOWORD(wParam);
+
+            switch (controlIdentifier) {
+                case 100:
+                {
+                    System::Diagnostics::Debug::WriteLine("Button1");
+
+                    break;
+                }
+                case 101:
+                {
+                    System::Diagnostics::Debug::WriteLine("Button2");
+
+                    SendMessage(hWnd, WM_DESTROY, NULL, NULL);
+
+                    break;
+                }
+            }
+            break;
+        }
         case WM_CREATE:
         {
             // The following loop iterates through the container of user 
@@ -114,8 +144,7 @@ LRESULT CALLBACK wndProc(
                         RegisterClass(&canvasWndClass);
 
                         // Create the window.
-                        hCanvasWnd = CreateWindowEx(
-                            0,                              // Optional window styles.
+                        hCanvasWnd = CreateWindow(
                             CLASS_NAME, // Window class
                             UiObject.objectText,    // Window text
                             WS_VISIBLE | WS_CHILD | WS_BORDER, // Styles 
@@ -135,8 +164,7 @@ LRESULT CALLBACK wndProc(
                     {
                         HWND hButtonWnd;
 
-                        hButtonWnd = CreateWindowEx(
-                            0,
+                        hButtonWnd = CreateWindow(
                             L"BUTTON", // Predefined class; Unicode assumed 
                             UiObject.objectText, // Button text 
                             // With the 'BS_OWNERDRAW'-Option the owner 
@@ -148,7 +176,7 @@ LRESULT CALLBACK wndProc(
                             BUTTON_WIDTH, // Button width
                             BUTTON_HEIGTH, // Button height
                             hWnd, // Parent window
-                            NULL, // No menu.
+                            (HMENU)UiObject.identifier, // No menu.
                             (HINSTANCE)GetModuleHandle(NULL),
                             NULL // Pointer not needed.
                         );
@@ -223,7 +251,7 @@ LRESULT CALLBACK wndProc(
                 false, // bStrikeOut
                 DEFAULT_CHARSET,
                 OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DRAFT_QUALITY, VARIABLE_PITCH,
-                L"Arial"
+                L"Calibri"
             );
 
             hOldItemFont = (HFONT)SelectObject(hDeviceContext, hItemFont);
@@ -351,7 +379,6 @@ LRESULT CALLBACK canvasWndProc(
         // itself or the operating system.
         case WM_PAINT:
         {
-            System::Diagnostics::Debug::WriteLine("Message is sent!");
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
             // left and lower right corners of the rectangle in wich 

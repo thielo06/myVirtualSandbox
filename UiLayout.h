@@ -21,10 +21,11 @@ static class UiObjects
 {
 public:
     struct Object {
-        RECT rectangle;
         COLORREF color;
         LPWSTR objectText;
-        int objectType; // 1: Button
+        RECT rectangle;
+        int identifier; // 100.. : Buttons
+        int objectType; // 0: Canvas, 1: Button
     };
 
     Object Canvas, Button1, Button2;
