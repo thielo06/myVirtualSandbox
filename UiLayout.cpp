@@ -19,9 +19,11 @@ UiObjects::UiObjects() {
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH,
-        CANVAS_VER_OFFSET + CANVAS_HEIGHT
+        CANVAS_VER_OFFSET + CANVAS_HEIGTH
     };
     Canvas.color = MyColors.ElevatedColorDarkTheme;
+    Canvas.objectText = L"Canvas1";
+    Canvas.objectType = 0;
 
     Objects.push_back(Canvas);
     #pragma endregion

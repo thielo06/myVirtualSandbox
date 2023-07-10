@@ -9,28 +9,35 @@ LRESULT CALLBACK wndProc(
     LPARAM lParam
 );
 
+LRESULT CALLBACK canvasWndProc(
+    HWND hWnd,
+    UINT uMsg,
+    WPARAM wParam,
+    LPARAM lParam
+);
+
 int __stdcall wWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
     _In_ LPWSTR lpCmdLine,
     _In_ int nShowCmd
 ) {
-    // A window class defines a set of behaviors that several windows 
-    // might have in common. Every window must be associated with a 
-    // window class. To register a window class, fill in a "WNDCLASS" 
-    // structure and call "RegisterClass" function afterwards.
     const wchar_t CLASS_NAME[] = L"myVirtualSandbox Window Class";
 
     BOOL useDarkMode;
     HWND hWnd;
     MSG msg = { };
-    WNDCLASS wndClass = { };
+    // A window class defines a set of behaviors that several windows 
+    // might have in common. Every window must be associated with a 
+    // window class. To register a window class, fill in a "WNDCLASS" 
+    // structure and call "RegisterClass" function afterwards.
+    WNDCLASS applicationWndClass = { };
 
-    wndClass.lpfnWndProc = wndProc;
-    wndClass.hInstance = hInstance;
-    wndClass.lpszClassName = CLASS_NAME;
+    applicationWndClass.lpfnWndProc = wndProc;
+    applicationWndClass.hInstance = hInstance;
+    applicationWndClass.lpszClassName = CLASS_NAME;
 
-    RegisterClass(&wndClass);
+    RegisterClass(&applicationWndClass);
 
     // Create the window.
     hWnd = CreateWindowEx(
@@ -38,10 +45,8 @@ int __stdcall wWinMain(
         CLASS_NAME,                     // Window class
         L"Learn to Program Windows",    // Window text
         WS_OVERLAPPEDWINDOW,            // Window style
-
         // Size and position
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
         NULL,       // Parent window    
         NULL,       // Menu
         hInstance,  // Instance handle
@@ -94,42 +99,71 @@ LRESULT CALLBACK wndProc(
                 UiObjects::Object UiObject = MyUiObjects.Objects[i];
 
                 switch (UiObject.objectType) {
-                case 1: // Button
-                {
-                    HBRUSH hBrush;
-                    HWND hButtonWnd;
-                    
-                    hBrush = CreateSolidBrush(UiObject.color);
+                    case 0: // Canvas
+                    {
+                        const wchar_t CLASS_NAME[] = L"myVirtualSandbox Canvas Class";
 
-                    hButtonWnd = CreateWindowEx(
-                        0,
-                        L"BUTTON", // Predefined class; Unicode assumed 
-                        UiObject.objectText, // Button text 
-                        // With the 'BS_OWNERDRAW'-Option the owner 
-                        // window receives a 'WM_DRAWITEM'-Message when
-                        // a visual aspect of the button has changed.
-                        WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW, // Styles 
-                        UiObject.rectangle.left, // x position 
-                        UiObject.rectangle.top, // y position 
-                        BUTTON_WIDTH, // Button width
-                        BUTTON_HEIGTH, // Button height
-                        hWnd, // Parent window
-                        NULL, // No menu.
-                        (HINSTANCE)GetModuleHandle(NULL),
-                        NULL // Pointer not needed.
-                    );
+                        HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(NULL);
+                        HWND hCanvasWnd;
+                        WNDCLASS canvasWndClass = { };
 
-                    DeleteObject(hBrush);
-                }
+                        canvasWndClass.lpfnWndProc = canvasWndProc;
+                        canvasWndClass.hInstance = hInstance;
+                        canvasWndClass.lpszClassName = CLASS_NAME;
+
+                        RegisterClass(&canvasWndClass);
+
+                        // Create the window.
+                        hCanvasWnd = CreateWindowEx(
+                            0,                              // Optional window styles.
+                            CLASS_NAME, // Window class
+                            UiObject.objectText,    // Window text
+                            WS_VISIBLE | WS_CHILD | WS_BORDER, // Styles 
+                            UiObject.rectangle.left, // x position 
+                            UiObject.rectangle.top, // y position 
+                            CANVAS_WIDTH,
+                            CANVAS_HEIGTH,
+                            hWnd, // Parent window
+                            NULL, // No menu.
+                            hInstance,
+                            NULL // Pointer not needed.
+                        );
+
+                        break;
+                    }
+                    case 1: // Button
+                    {
+                        HWND hButtonWnd;
+
+                        hButtonWnd = CreateWindowEx(
+                            0,
+                            L"BUTTON", // Predefined class; Unicode assumed 
+                            UiObject.objectText, // Button text 
+                            // With the 'BS_OWNERDRAW'-Option the owner 
+                            // window receives a 'WM_DRAWITEM'-Message when
+                            // a visual aspect of the button has changed.
+                            WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW, // Styles 
+                            UiObject.rectangle.left, // x position 
+                            UiObject.rectangle.top, // y position 
+                            BUTTON_WIDTH, // Button width
+                            BUTTON_HEIGTH, // Button height
+                            hWnd, // Parent window
+                            NULL, // No menu.
+                            (HINSTANCE)GetModuleHandle(NULL),
+                            NULL // Pointer not needed.
+                        );
+
+                        break;
+                    }
                 }
             }
-            return 0;
+            break;
         }
         case WM_DESTROY:
         {
             PostQuitMessage(0);
 
-            return 0;
+            break;
         }
 
         case WM_DRAWITEM:
@@ -210,7 +244,7 @@ LRESULT CALLBACK wndProc(
             DeleteObject(hElevatedColorBrush);
             DeleteObject(hFrameColorBrush);
 
-            return 0;
+            break;
         }
 
         // To paint the window the "WM_PAINT" message has to be 
@@ -225,38 +259,23 @@ LRESULT CALLBACK wndProc(
             PAINTSTRUCT paintStruct;
             HDC hDeviceContext;
 
-            HBRUSH hBackgroundColorBrush, hElevatedColorBrush, hFrameColorBrush;
+            HBRUSH hBrush;
             
             hDeviceContext = BeginPaint(hWnd, &paintStruct);
-            
-            hBackgroundColorBrush = CreateSolidBrush(MyColors.BackgroundColorDarkTheme);
-            hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
-            hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
+            hBrush = CreateSolidBrush(MyColors.BackgroundColorDarkTheme);
 
+            // Paint application background.
             FillRect(
                 hDeviceContext,
                 &paintStruct.rcPaint,
-                hBackgroundColorBrush
-            );
-                
-            FillRect(
-                hDeviceContext,
-                &MyUiObjects.Canvas.rectangle,
-                hElevatedColorBrush
-            );
-            AppFunctions::FrameRectangle(
-                hDeviceContext,
-                MyUiObjects.Canvas.rectangle,
-                hFrameColorBrush
+                hBrush
             );
 
-            DeleteObject(hBackgroundColorBrush);
-            DeleteObject(hElevatedColorBrush);
-            DeleteObject(hFrameColorBrush);
+            DeleteObject(hBrush);
 
             EndPaint(hWnd, &paintStruct);
 
-            return 0;
+            break;
         }
 
         // When the mouse moves over a window, the window receives a 
@@ -306,25 +325,71 @@ LRESULT CALLBACK wndProc(
 
             SetCursor(cursor);
 
-            return 0;
+            break;
         }
 
         case WM_LBUTTONDOWN:
         {
-            POINT pt;
 
-            pt.x = GET_X_LPARAM(lParam);
-            pt.y = GET_Y_LPARAM(lParam);
-
-            // In case that the mouse is within the canvas area, the 
-            // "DrawPoint" function is called.
-            if (AppFunctions::Contains(MyUiObjects.Canvas.rectangle, pt)) {
-                AppFunctions::DrawPoint(hWnd, pt, MyColors.AccentColorDarkTheme);
-            }
-
-            return 0;
+            break;
         }
     }
 
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK canvasWndProc(
+    HWND hCanvasWnd,
+    UINT uMsg,
+    WPARAM wParam,
+    LPARAM lParam
+) {
+    switch (uMsg)
+    {
+        // To paint the window the "WM_PAINT" message has to be 
+        // received by the window. It is sent by either the program 
+        // itself or the operating system.
+        case WM_PAINT:
+        {
+            System::Diagnostics::Debug::WriteLine("Message is sent!");
+            // The "rcPaint" member of the "PAINTSTRCUT" structure 
+            // returns a "RECT" structure that specifies the upper 
+            // left and lower right corners of the rectangle in wich 
+            // the painting is requested.
+            PAINTSTRUCT paintStruct;
+            HDC hDeviceContext;
+
+            HBRUSH hBrush;
+
+            hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
+            hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+
+            // Paint application background.
+            FillRect(
+                hDeviceContext,
+                &paintStruct.rcPaint,
+                hBrush
+            );
+
+            DeleteObject(hBrush);
+
+            EndPaint(hCanvasWnd, &paintStruct);
+
+            break;
+        }
+
+        case WM_LBUTTONDOWN:
+        {
+            POINT point;
+
+            point.x = GET_X_LPARAM(lParam);
+            point.y = GET_Y_LPARAM(lParam);
+
+            AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
+            
+            break;
+        }
+    }
+
+    return DefWindowProc(hCanvasWnd, uMsg, wParam, lParam);
 }

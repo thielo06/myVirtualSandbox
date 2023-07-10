@@ -12,7 +12,7 @@ using namespace System;
 const int CANVAS_VER_OFFSET = 10;
 const int CANVAS_HOR_OFFSET = 10;
 const int CANVAS_WIDTH = 640;
-const int CANVAS_HEIGHT = 480;
+const int CANVAS_HEIGTH = 480;
 
 const int BUTTON_WIDTH = 100;
 const int BUTTON_HEIGTH = 30;
