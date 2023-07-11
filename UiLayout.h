@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dwmapi.h>
+#include <string>
 #include <vector>
 
 // Structure that defines a color palette. See 
@@ -20,15 +21,19 @@ public:
 static class UiObjects
 {
 public:
+    enum ObjectType { Custom, Button };
+
     struct Object {
         COLORREF color;
-        LPWSTR objectText;
+        HMENU controlIdentifier; // 100.. : Buttons
+        LPWSTR classIdentifier;
+        LPWSTR objectTitle;
+        ObjectType objectType;
+        DWORD objectStyles;
         RECT rectangle;
-        int identifier; // 100.. : Buttons
-        int objectType; // 0: Canvas, 1: Button
     };
 
-    Object Canvas, Button1, Button2;
+    Object Canvas, Output, Button1, Button2;
 
     std::vector<Object> Objects;
 

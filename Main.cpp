@@ -111,7 +111,7 @@ LRESULT CALLBACK wndProc(
                 }
                 case 101:
                 {
-                    System::Diagnostics::Debug::WriteLine("Button2");
+                    System::Diagnostics::Debug::WriteLine("Close Window ...");
 
                     SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 
@@ -122,68 +122,41 @@ LRESULT CALLBACK wndProc(
         }
         case WM_CREATE:
         {
+            HINSTANCE hInstance;
+            WNDCLASS canvasWndClass;
+
+            hInstance = (HINSTANCE)GetModuleHandle(NULL);
+
+            canvasWndClass = { };
+
+            canvasWndClass.lpfnWndProc = canvasWndProc;
+            canvasWndClass.hInstance = hInstance;
+            canvasWndClass.lpszClassName = L"myVirtualSandbox Canvas Class";
+
+            RegisterClass(&canvasWndClass);
+
             // The following loop iterates through the container of user 
             // interface objects and if the object is of button type then
             // it is added to the user interface.
             for (int i = 0; i < MyUiObjects.Objects.size(); i++) {
                 UiObjects::Object UiObject = MyUiObjects.Objects[i];
 
-                switch (UiObject.objectType) {
-                    case 0: // Canvas
-                    {
-                        const wchar_t CLASS_NAME[] = L"myVirtualSandbox Canvas Class";
+                HWND hUiObjectWnd;
 
-                        HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(NULL);
-                        HWND hCanvasWnd;
-                        WNDCLASS canvasWndClass = { };
-
-                        canvasWndClass.lpfnWndProc = canvasWndProc;
-                        canvasWndClass.hInstance = hInstance;
-                        canvasWndClass.lpszClassName = CLASS_NAME;
-
-                        RegisterClass(&canvasWndClass);
-
-                        // Create the window.
-                        hCanvasWnd = CreateWindow(
-                            CLASS_NAME, // Window class
-                            UiObject.objectText,    // Window text
-                            WS_VISIBLE | WS_CHILD | WS_BORDER, // Styles 
-                            UiObject.rectangle.left, // x position 
-                            UiObject.rectangle.top, // y position 
-                            CANVAS_WIDTH,
-                            CANVAS_HEIGTH,
-                            hWnd, // Parent window
-                            NULL, // No menu.
-                            hInstance,
-                            NULL // Pointer not needed.
-                        );
-
-                        break;
-                    }
-                    case 1: // Button
-                    {
-                        HWND hButtonWnd;
-
-                        hButtonWnd = CreateWindow(
-                            L"BUTTON", // Predefined class; Unicode assumed 
-                            UiObject.objectText, // Button text 
-                            // With the 'BS_OWNERDRAW'-Option the owner 
-                            // window receives a 'WM_DRAWITEM'-Message when
-                            // a visual aspect of the button has changed.
-                            WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW, // Styles 
-                            UiObject.rectangle.left, // x position 
-                            UiObject.rectangle.top, // y position 
-                            BUTTON_WIDTH, // Button width
-                            BUTTON_HEIGTH, // Button height
-                            hWnd, // Parent window
-                            (HMENU)UiObject.identifier, // No menu.
-                            (HINSTANCE)GetModuleHandle(NULL),
-                            NULL // Pointer not needed.
-                        );
-
-                        break;
-                    }
-                }
+                // Create the window.
+                hUiObjectWnd = CreateWindow(
+                    UiObject.classIdentifier, // Window class
+                    UiObject.objectTitle,    // Window text
+                    UiObject.objectStyles, // Styles 
+                    UiObject.rectangle.left, // Horizontal position 
+                    UiObject.rectangle.top, // Vertical position 
+                    UiObject.rectangle.right - UiObject.rectangle.left, // Width
+                    UiObject.rectangle.bottom - UiObject.rectangle.top, // Height
+                    hWnd, // Parent window
+                    UiObject.controlIdentifier, // No menu.
+                    hInstance,
+                    NULL // Pointer not needed.
+                );
             }
             break;
         }
