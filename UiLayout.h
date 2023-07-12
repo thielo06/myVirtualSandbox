@@ -21,16 +21,19 @@ public:
 static class UiObjects
 {
 public:
-    enum ObjectType { Custom, Button };
+    enum ObjectClass { Custom, Button };
 
     struct Object {
+        LPWSTR lpClassName;
+        LPWSTR lpWindowName;
+        DWORD dwStyle;
+        LONG x;
+        LONG y;
+        LONG nWidth;
+        LONG nHeigth;
+        HMENU hMenu; // 100.. : Buttons
+        ObjectClass objectType;
         COLORREF color;
-        HMENU controlIdentifier; // 100.. : Buttons
-        LPWSTR classIdentifier;
-        LPWSTR objectTitle;
-        ObjectType objectType;
-        DWORD objectStyles;
-        RECT rectangle;
     };
 
     Object Canvas, Output, Button1, Button2;

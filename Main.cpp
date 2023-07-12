@@ -123,7 +123,7 @@ LRESULT CALLBACK wndProc(
         case WM_CREATE:
         {
             HINSTANCE hInstance;
-            WNDCLASS canvasWndClass;
+            WNDCLASS canvasWndClass, outputWndClass;
 
             hInstance = (HINSTANCE)GetModuleHandle(NULL);
 
@@ -145,15 +145,15 @@ LRESULT CALLBACK wndProc(
 
                 // Create the window.
                 hUiObjectWnd = CreateWindow(
-                    UiObject.classIdentifier, // Window class
-                    UiObject.objectTitle,    // Window text
-                    UiObject.objectStyles, // Styles 
-                    UiObject.rectangle.left, // Horizontal position 
-                    UiObject.rectangle.top, // Vertical position 
-                    UiObject.rectangle.right - UiObject.rectangle.left, // Width
-                    UiObject.rectangle.bottom - UiObject.rectangle.top, // Height
+                    UiObject.lpClassName, // Window class
+                    UiObject.lpWindowName,    // Window text
+                    UiObject.dwStyle, // Styles 
+                    UiObject.x, // Horizontal position 
+                    UiObject.y, // Vertical position 
+                    UiObject.nWidth, // Width
+                    UiObject.nHeigth, // Height
                     hWnd, // Parent window
-                    UiObject.controlIdentifier, // No menu.
+                    UiObject.hMenu, // No menu.
                     hInstance,
                     NULL // Pointer not needed.
                 );
@@ -386,6 +386,8 @@ LRESULT CALLBACK canvasWndProc(
             point.y = GET_Y_LPARAM(lParam);
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
+
+            // Get Output Window Handle
             
             break;
         }
