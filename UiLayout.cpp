@@ -23,6 +23,7 @@ UiObjects::UiObjects() {
         CANVAS_WIDTH,
         CANVAS_HEIGTH,
         NULL,
+        NULL,
         ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
     };
@@ -31,11 +32,12 @@ UiObjects::UiObjects() {
     Output = {
         L"EDIT",
         L"Output",
-        WS_VISIBLE | WS_CHILD | WS_BORDER,
+        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE, // Add ES_READONLY to make it unaccessible for the user.
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET,
         CANVAS_WIDTH,
         OUTPUT_HEIGTH,
+        (HMENU)200,
         NULL,
         ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
@@ -54,6 +56,7 @@ UiObjects::UiObjects() {
         BUTTON_WIDTH,
         BUTTON_HEIGTH,
         (HMENU)100,
+        NULL,
         ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
@@ -68,6 +71,7 @@ UiObjects::UiObjects() {
         BUTTON_WIDTH,
         BUTTON_HEIGTH,
         (HMENU)101,
+        NULL,
         ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };

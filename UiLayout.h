@@ -32,6 +32,7 @@ public:
         LONG nWidth;
         LONG nHeigth;
         HMENU hMenu; // 100.. : Buttons
+        HWND hObjectWnd;
         ObjectClass objectType;
         COLORREF color;
     };
@@ -41,4 +42,4 @@ public:
     std::vector<Object> Objects;
 
     UiObjects();
-} MyUiObjects;
+} MyObjects;

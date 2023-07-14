@@ -120,10 +120,11 @@ LRESULT CALLBACK wndProc(
             }
             break;
         }
+
         case WM_CREATE:
         {
             HINSTANCE hInstance;
-            WNDCLASS canvasWndClass, outputWndClass;
+            WNDCLASS canvasWndClass;
 
             hInstance = (HINSTANCE)GetModuleHandle(NULL);
 
@@ -136,30 +137,34 @@ LRESULT CALLBACK wndProc(
             RegisterClass(&canvasWndClass);
 
             // The following loop iterates through the container of user 
-            // interface objects and if the object is of button type then
-            // it is added to the user interface.
-            for (int i = 0; i < MyUiObjects.Objects.size(); i++) {
-                UiObjects::Object UiObject = MyUiObjects.Objects[i];
+            // interface objects.
+            for (int i = 0; i < MyObjects.Objects.size(); i++) {
+                UiObjects::Object &Object = MyObjects.Objects[i];
 
-                HWND hUiObjectWnd;
-
-                // Create the window.
-                hUiObjectWnd = CreateWindow(
-                    UiObject.lpClassName, // Window class
-                    UiObject.lpWindowName,    // Window text
-                    UiObject.dwStyle, // Styles 
-                    UiObject.x, // Horizontal position 
-                    UiObject.y, // Vertical position 
-                    UiObject.nWidth, // Width
-                    UiObject.nHeigth, // Height
+                HWND hObjectWnd;
+                
+                hObjectWnd = CreateWindow(
+                    Object.lpClassName, // Window class
+                    Object.lpWindowName,    // Window text
+                    Object.dwStyle, // Styles 
+                    Object.x, // Horizontal position 
+                    Object.y, // Vertical position 
+                    Object.nWidth, // Width
+                    Object.nHeigth, // Height
                     hWnd, // Parent window
-                    UiObject.hMenu, // No menu.
+                    Object.hMenu, // No menu.
                     hInstance,
                     NULL // Pointer not needed.
                 );
+
+                BOOL status = IsWindow(hObjectWnd);
+
+                MyObjects.Objects[i].hObjectWnd = hObjectWnd;
             }
+
             break;
         }
+
         case WM_DESTROY:
         {
             PostQuitMessage(0);
@@ -173,10 +178,11 @@ LRESULT CALLBACK wndProc(
             HDC hDeviceContext;
             HFONT hItemFont, hOldItemFont;
             HWND hItemWnd;
-            int itemState;
             LPDRAWITEMSTRUCT itemStructure;
             LPWSTR lpBuffer;
             RECT itemRectangle;
+
+            int itemState, length;
 
             // The 'lparam'-Parameter of 'WM_DRAWITEM'-Message holds
             // a pointer to a 'DRAWITEMSTRUCT'-Structure wich provides
@@ -207,7 +213,6 @@ LRESULT CALLBACK wndProc(
                 );
             }
 
-            int length;
             length = GetWindowTextLength(hItemWnd);
 
             lpBuffer = new wchar_t[length + 1];
@@ -387,8 +392,16 @@ LRESULT CALLBACK canvasWndProc(
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
 
-            // Get Output Window Handle
-            
+            HWND hOutputWnd = MyObjects.Output.hObjectWnd;
+
+            // Check if hObjectWnd is a valid handle
+            if (IsWindow(hOutputWnd))
+            {
+                SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)L"Test.");
+            }
+            else {
+                System::Diagnostics::Debug::WriteLine("Is not..");
+            }
             break;
         }
     }
