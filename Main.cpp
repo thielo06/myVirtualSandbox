@@ -138,7 +138,7 @@ LRESULT CALLBACK wndProc(
 
             // The following loop iterates through the container of user 
             // interface objects.
-            for (int i = 0; i < MyObjects.Objects.size(); i++) {
+            for (int i = 0; i < (int)MyObjects.Objects.size(); i++) {
                 UiObjects::Object* pObject = MyObjects.Objects[i];
                 
                 HWND hObjectWnd;
@@ -383,19 +383,23 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_LBUTTONDOWN:
         {
-            POINT point;
+            POINT point = {};
 
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
 
+            wchar_t textOut[64];
+
+            wsprintfW(textOut, L"%i, %i", point.x, point.y);
+
             HWND hOutputWnd = MyObjects.Output.hObjectWnd;
 
             // Check if hObjectWnd is a valid handle
             if (IsWindow(hOutputWnd))
             {
-                SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)L"Test.");
+                SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOut);
             }
             else {
                 System::Diagnostics::Debug::WriteLine("Is not..");
