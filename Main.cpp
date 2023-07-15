@@ -139,27 +139,25 @@ LRESULT CALLBACK wndProc(
             // The following loop iterates through the container of user 
             // interface objects.
             for (int i = 0; i < MyObjects.Objects.size(); i++) {
-                UiObjects::Object &Object = MyObjects.Objects[i];
-
+                UiObjects::Object* pObject = MyObjects.Objects[i];
+                
                 HWND hObjectWnd;
                 
                 hObjectWnd = CreateWindow(
-                    Object.lpClassName, // Window class
-                    Object.lpWindowName,    // Window text
-                    Object.dwStyle, // Styles 
-                    Object.x, // Horizontal position 
-                    Object.y, // Vertical position 
-                    Object.nWidth, // Width
-                    Object.nHeigth, // Height
+                    pObject->lpClassName, // Window class
+                    pObject->lpWindowName,    // Window text
+                    pObject->dwStyle, // Styles 
+                    pObject->x, // Horizontal position 
+                    pObject->y, // Vertical position 
+                    pObject->nWidth, // Width
+                    pObject->nHeigth, // Height
                     hWnd, // Parent window
-                    Object.hMenu, // No menu.
+                    pObject->hMenu, // No menu.
                     hInstance,
                     NULL // Pointer not needed.
                 );
 
-                BOOL status = IsWindow(hObjectWnd);
-
-                MyObjects.Objects[i].hObjectWnd = hObjectWnd;
+                pObject->hObjectWnd = hObjectWnd;
             }
 
             break;

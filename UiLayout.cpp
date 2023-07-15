@@ -13,6 +13,9 @@ ColorPalette::ColorPalette() {
     AccentColorDarkTheme = RGB(202, 62, 71);
 }
 
+// Initialization of the user interface objects that are declared in 
+// "UiLayout"-Header. After each assignment the address of the object 
+// is stored in the "Objects"-Vector. 
 UiObjects::UiObjects() {
     Canvas = {
         L"myVirtualSandbox Canvas Class",
@@ -27,7 +30,7 @@ UiObjects::UiObjects() {
         ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(Canvas);
+    Objects.push_back(&Canvas);
 
     Output = {
         L"EDIT",
@@ -42,7 +45,7 @@ UiObjects::UiObjects() {
         ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(Output);
+    Objects.push_back(&Output);
 
     Button1 = {
         L"BUTTON",
@@ -60,7 +63,7 @@ UiObjects::UiObjects() {
         ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(Button1);
+    Objects.push_back(&Button1);
 
     Button2 = {
         L"BUTTON",
@@ -76,5 +79,5 @@ UiObjects::UiObjects() {
         MyColors.ElevatedColorDarkTheme
     };
 
-    Objects.push_back(Button2);
+    Objects.push_back(&Button2);
 }

@@ -37,9 +37,12 @@ public:
         COLORREF color;
     };
 
+    // Declare the user interface objects.
     Object Canvas, Output, Button1, Button2;
 
-    std::vector<Object> Objects;
+    // Declare a vector class as a container of pointers to the 
+    // "Object"-Elements.
+    std::vector<Object*> Objects;
 
     UiObjects();
 } MyObjects;
