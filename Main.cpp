@@ -92,10 +92,9 @@ LRESULT CALLBACK wndProc(
         // The following message is sent among others when a control 
         // like a button sends a notification message to its parent 
         // window.
-        // In case this message is actually sent by a control, its low-
-        // order word of the word parameter stores the control identifier
-        // wich is set on object initialization with the "hMenu"-
-        // Parameter.
+        // Its low-order word of the word parameter stores the control 
+        // identifier wich is set on object initialization with the 
+        // "hMenu"-Parameter.
         case WM_COMMAND:
         {
             DWORD controlIdentifier;
@@ -123,8 +122,13 @@ LRESULT CALLBACK wndProc(
 
         case WM_CREATE:
         {
+            HFONT hFont;
             HINSTANCE hInstance;
             WNDCLASS canvasWndClass;
+
+            // Create a font object that is used for all windows from 
+            // the default font of user interface objects.
+            hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
             hInstance = (HINSTANCE)GetModuleHandle(NULL);
 
@@ -157,6 +161,10 @@ LRESULT CALLBACK wndProc(
                     NULL // Pointer not needed.
                 );
 
+                // Send 'WM_SETFONT' message to each window to set the 
+                // font to default font for user interface objects. 
+                SendMessage(hObjectWnd, WM_SETFONT, (WPARAM)hFont, TRUE);
+
                 pObject->hObjectWnd = hObjectWnd;
             }
 
@@ -174,7 +182,6 @@ LRESULT CALLBACK wndProc(
         {
             HBRUSH hElevatedColorBrush, hFrameColorBrush;
             HDC hDeviceContext;
-            HFONT hItemFont, hOldItemFont;
             HWND hItemWnd;
             LPDRAWITEMSTRUCT itemStructure;
             LPWSTR lpBuffer;
@@ -211,29 +218,18 @@ LRESULT CALLBACK wndProc(
                 );
             }
 
+            // Create a buffer with length of the window text wich is 
+            // defined on object initialization.
             length = GetWindowTextLength(hItemWnd);
-
             lpBuffer = new wchar_t[length + 1];
+
+            // Get the window text and write it to the buffer.
             GetWindowText(hItemWnd, lpBuffer, length + 1);
-
-            hItemFont = CreateFont(
-                15,
-                0,
-                0, 
-                0, 
-                FW_DONTCARE,
-                false, // bItalic
-                false, // bUnderline
-                false, // bStrikeOut
-                DEFAULT_CHARSET,
-                OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DRAFT_QUALITY, VARIABLE_PITCH,
-                L"Calibri"
-            );
-
-            hOldItemFont = (HFONT)SelectObject(hDeviceContext, hItemFont);
 
             SetTextColor(hDeviceContext, MyColors.TextColorDarkTheme);
             SetBkMode(hDeviceContext, TRANSPARENT);
+
+            // Draw text to the button.
             DrawText(
                 hDeviceContext,
                 lpBuffer,
@@ -241,9 +237,6 @@ LRESULT CALLBACK wndProc(
                 &itemRectangle,
                 DT_CENTER | DT_VCENTER | DT_SINGLELINE
             );
-
-            SelectObject(hDeviceContext, hOldItemFont);
-            DeleteObject(hItemFont);
 
             DeleteObject(hElevatedColorBrush);
             DeleteObject(hFrameColorBrush);
@@ -336,6 +329,24 @@ LRESULT CALLBACK wndProc(
         {
 
             break;
+        }
+
+        case WM_CTLCOLOREDIT:
+        {
+            HBRUSH hBrush;
+            HDC hEditControl;
+            HFONT hItemFont;
+
+            hEditControl = (HDC)wParam;
+
+            SetTextColor(hEditControl, MyColors.TextColorDarkTheme);
+
+            HWND hOutputWnd = MyObjects.Output.hObjectWnd;
+
+            SetBkColor(hEditControl, MyColors.ElevatedColorDarkTheme);
+            SetDCBrushColor(hEditControl, MyColors.ElevatedColorDarkTheme);
+
+            return (HRESULT)GetStockObject(DC_BRUSH);
         }
     }
 
