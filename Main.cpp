@@ -394,26 +394,59 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_LBUTTONDOWN:
         {
+            LPWSTR textOutput, wndTextBuffer;
             POINT point = {};
+
+            int wndTextLength, textLength;
 
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
 
-            wchar_t textOut[64];
-
-            wsprintfW(textOut, L"%i, %i", point.x, point.y);
-
             HWND hOutputWnd = MyObjects.Output.hObjectWnd;
 
             // Check if hObjectWnd is a valid handle
             if (IsWindow(hOutputWnd))
             {
-                SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOut);
+                // Create a buffer with length of the window text.
+                wndTextLength = GetWindowTextLength(hOutputWnd) + 1;
+                wndTextBuffer = new wchar_t[wndTextLength];
+
+                // Get the window text and write it to the buffer.
+                GetWindowText(hOutputWnd, wndTextBuffer, wndTextLength);
+
+                wchar_t tempTextBuffer[256];
+
+                wsprintfW(tempTextBuffer, L"%i, %i", point.x, point.y);
+
+                // If the length of the window text is bigger than 
+                // one, the text output is the window text and the 
+                // value of the temporary text buffer.
+                // If it is equal to one it means that it is empty, so 
+                // the text output is just the value of the tempory 
+                // text buffer.
+                if (wndTextLength > 1) {
+                    // The length of the new text is the length of the 
+                    // window text in addition to the tempory text buffer.
+                    // The array size is increade by three characters, two 
+                    // for a linebreak "\r\n" and one for the null 
+                    // terminator "\0".
+                    textLength = wndTextLength + 2 + wcslen(tempTextBuffer) + 1;
+                    textOutput = new wchar_t[textLength];
+
+                    wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
+                } else {
+                    textLength = wcslen(tempTextBuffer) + 1;
+                    textOutput = new wchar_t[textLength];
+
+                    wsprintfW(textOutput, L"%s", tempTextBuffer);
+                }
+
+                SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
             }
             else {
-                System::Diagnostics::Debug::WriteLine("Is not..");
+
             }
             break;
         }

@@ -31,7 +31,7 @@ public:
         LONG y;
         LONG nWidth;
         LONG nHeigth;
-        HMENU hMenu; // 100.. : Buttons
+        HMENU hMenu;
         HWND hObjectWnd;
         ObjectClass objectType;
         COLORREF color;

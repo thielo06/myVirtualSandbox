@@ -20,12 +20,12 @@ UiObjects::UiObjects() {
     Canvas = {
         L"myVirtualSandbox Canvas Class",
         L"Canvas",
-        WS_VISIBLE | WS_CHILD | WS_BORDER,
+        WS_VISIBLE | WS_CHILD,
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         CANVAS_WIDTH,
         CANVAS_HEIGTH,
-        NULL,
+        (HMENU)-1,
         NULL,
         ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
@@ -34,8 +34,11 @@ UiObjects::UiObjects() {
 
     Output = {
         L"EDIT",
-        L"Output",
-        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE, // Add ES_READONLY to make it unaccessible for the user.
+        NULL,
+        // Add "ES_READONLY" to make it unaccessible for the user. 
+        // Take note that you have to handle "WM_CTLCOLORSTATIC" 
+        // message then.
+        WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET,
         CANVAS_WIDTH,
@@ -53,7 +56,7 @@ UiObjects::UiObjects() {
         // With the 'BS_OWNERDRAW'-Option the owner 
         // window receives a 'WM_DRAWITEM'-Message when
         // a visual aspect of the button has changed.
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW,
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + BUTTON_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
@@ -68,7 +71,7 @@ UiObjects::UiObjects() {
     Button2 = {
         L"BUTTON",
         L"Close",
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER | BS_OWNERDRAW,
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + BUTTON_HOR_OFFSET + BUTTON_WIDTH + BUTTON_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
