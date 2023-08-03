@@ -217,6 +217,8 @@ LRESULT CALLBACK wndProc(
                     // Following the fallthrough behaviour of C++, the 
                     // code that applies to the lower case also 
                     // applies when this case is called.
+                    // Note that the "break" statement is missing in 
+                    // this case.
                 }
                 case 101:
                 {
@@ -267,34 +269,39 @@ LRESULT CALLBACK wndProc(
                     HDC hdcMemDC;
                     HGDIOBJ oldBitmap;
                     HRSRC hImageResource;
-                    LPWSTR bitmapResourceName;
+                    LPWSTR bitmapResource;
 
+                    // Create a compatible device context in reference 
+                    // to the device context of item structure.
                     hdcMemDC = CreateCompatibleDC(hDeviceContext);
 
                     if (itemState & ODS_SELECTED) {
-                        bitmapResourceName = MAKEINTRESOURCE(IDB_BITMAP2);
+                        bitmapResource = MAKEINTRESOURCE(IDB_BITMAP2);
                     } else {
-                        bitmapResourceName = MAKEINTRESOURCE(IDB_BITMAP1);
+                        bitmapResource = MAKEINTRESOURCE(IDB_BITMAP1);
                     }
 
-                    hImageResource = FindResource(
-                        NULL,
-                        bitmapResourceName,
-                        L"Bitmap"
-                    );
-
+                    // Create a handle from the bitmap resource.
                     hBitmap = (HBITMAP)LoadImageW(
                         GetModuleHandle(NULL),
-                        bitmapResourceName,
+                        bitmapResource,
                         IMAGE_BITMAP,
                         0, 0,
                         NULL
                     );
 
+                    // Select the bitmap handle to the source device 
+                    // context and store a copy of it in a variable.
                     oldBitmap = SelectObject(hdcMemDC, hBitmap);
 
+                    // Read graphical information from the handle 
+                    // and write it to the buffer at specified 
+                    // location.
                     GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
+                    // Perform a bit block transfer between the source 
+                    // device context and the device context of the 
+                    // item structure.
                     BitBlt(
                         hDeviceContext,
                         0, 0,
@@ -305,6 +312,8 @@ LRESULT CALLBACK wndProc(
                         SRCCOPY
                     );
 
+                    // Select the original bitmap handle to the source 
+                    // device context and delete the object.
                     SelectObject(hdcMemDC, oldBitmap);
                     DeleteDC(hdcMemDC);
 
