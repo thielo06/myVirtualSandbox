@@ -116,12 +116,23 @@ LRESULT CALLBACK wndProc(
 
                     break;
                 }
+                case 102:
+                {
+                    HWND hOutputWnd;
+                    
+                    hOutputWnd = MyObjects.Output.hObjectWnd;
+
+                    SendMessage(hOutputWnd, WM_SETTEXT, NULL, NULL);
+
+                    break;
+                }
             }
             break;
         }
 
         case WM_CREATE:
         {
+            HANDLE hImage;
             HFONT hFont;
             HINSTANCE hInstance;
             WNDCLASS canvasWndClass;
@@ -180,14 +191,14 @@ LRESULT CALLBACK wndProc(
 
         case WM_DRAWITEM:
         {
-            HBRUSH hElevatedColorBrush, hFrameColorBrush;
             HDC hDeviceContext;
             HWND hItemWnd;
             LPDRAWITEMSTRUCT itemStructure;
-            LPWSTR lpBuffer;
             RECT itemRectangle;
 
-            int itemState, length;
+            int itemState, length, controlIdentifier;
+
+            controlIdentifier = (int)wParam;
 
             // The 'lparam'-Parameter of 'WM_DRAWITEM'-Message holds
             // a pointer to a 'DRAWITEMSTRUCT'-Structure wich provides
@@ -200,46 +211,106 @@ LRESULT CALLBACK wndProc(
             itemRectangle = itemStructure->rcItem;
             itemState = itemStructure->itemState;
 
-            hElevatedColorBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
-            hFrameColorBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
+            switch (controlIdentifier) {
+                case 100:
+                {
+                    // Following the fallthrough behaviour of C++, the 
+                    // code that applies to the lower case also 
+                    // applies when this case is called.
+                }
+                case 101:
+                {
+                    HBRUSH hBrush;
+                    LPWSTR lpBuffer;
 
-            if (itemState & ODS_SELECTED) {
-                FillRect(
-                    hDeviceContext,
-                    &itemRectangle,
-                    hFrameColorBrush
-                );
+                    if (itemState & ODS_SELECTED) {
+                        hBrush = CreateSolidBrush(MyColors.FrameColorDarkTheme);
+                    }
+                    else {
+                        hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+                    }
+
+                    FillRect(
+                        hDeviceContext,
+                        &itemRectangle,
+                        hBrush
+                    );
+
+                    DeleteObject(hBrush);
+
+                    // Create a buffer with length of the window text wich is 
+                    // defined on object initialization.
+                    length = GetWindowTextLength(hItemWnd);
+                    lpBuffer = new wchar_t[length + 1];
+
+                    // Get the window text and write it to the buffer.
+                    GetWindowText(hItemWnd, lpBuffer, length + 1);
+
+                    SetTextColor(hDeviceContext, MyColors.TextColorDarkTheme);
+                    SetBkMode(hDeviceContext, TRANSPARENT);
+
+                    // Draw text to the button.
+                    DrawText(
+                        hDeviceContext,
+                        lpBuffer,
+                        length,
+                        &itemRectangle,
+                        DT_CENTER | DT_VCENTER | DT_SINGLELINE
+                    );
+
+                    break;
+                }
+                case 102:
+                {
+                    BITMAP bitmap;
+                    HBITMAP hBitmap;
+                    HDC hdcMemDC;
+                    HGDIOBJ oldBitmap;
+                    HRSRC hImageResource;
+                    LPWSTR bitmapResourceName;
+
+                    hdcMemDC = CreateCompatibleDC(hDeviceContext);
+
+                    if (itemState & ODS_SELECTED) {
+                        bitmapResourceName = MAKEINTRESOURCE(IDB_BITMAP2);
+                    } else {
+                        bitmapResourceName = MAKEINTRESOURCE(IDB_BITMAP1);
+                    }
+
+                    hImageResource = FindResource(
+                        NULL,
+                        bitmapResourceName,
+                        L"Bitmap"
+                    );
+
+                    hBitmap = (HBITMAP)LoadImageW(
+                        GetModuleHandle(NULL),
+                        bitmapResourceName,
+                        IMAGE_BITMAP,
+                        0, 0,
+                        NULL
+                    );
+
+                    oldBitmap = SelectObject(hdcMemDC, hBitmap);
+
+                    GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                    BitBlt(
+                        hDeviceContext,
+                        0, 0,
+                        bitmap.bmWidth,
+                        bitmap.bmHeight,
+                        hdcMemDC,
+                        0, 0,
+                        SRCCOPY
+                    );
+
+                    SelectObject(hdcMemDC, oldBitmap);
+                    DeleteDC(hdcMemDC);
+
+                    break;
+                }
             }
-            else {
-                FillRect(
-                    hDeviceContext,
-                    &itemRectangle,
-                    hElevatedColorBrush
-                );
-            }
-
-            // Create a buffer with length of the window text wich is 
-            // defined on object initialization.
-            length = GetWindowTextLength(hItemWnd);
-            lpBuffer = new wchar_t[length + 1];
-
-            // Get the window text and write it to the buffer.
-            GetWindowText(hItemWnd, lpBuffer, length + 1);
-
-            SetTextColor(hDeviceContext, MyColors.TextColorDarkTheme);
-            SetBkMode(hDeviceContext, TRANSPARENT);
-
-            // Draw text to the button.
-            DrawText(
-                hDeviceContext,
-                lpBuffer,
-                length,
-                &itemRectangle,
-                DT_CENTER | DT_VCENTER | DT_SINGLELINE
-            );
-
-            DeleteObject(hElevatedColorBrush);
-            DeleteObject(hFrameColorBrush);
 
             break;
         }
@@ -394,6 +465,7 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_LBUTTONDOWN:
         {
+            HWND hOutputWnd;
             LPWSTR textOutput, wndTextBuffer;
             POINT point = {};
 
@@ -404,7 +476,7 @@ LRESULT CALLBACK canvasWndProc(
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
 
-            HWND hOutputWnd = MyObjects.Output.hObjectWnd;
+            hOutputWnd = MyObjects.Output.hObjectWnd;
 
             // Check if hObjectWnd is a valid handle
             if (IsWindow(hOutputWnd))
@@ -421,17 +493,19 @@ LRESULT CALLBACK canvasWndProc(
                 wsprintfW(tempTextBuffer, L"%i, %i", point.x, point.y);
 
                 // If the length of the window text is bigger than 
-                // one, the text output is the window text and the 
-                // value of the temporary text buffer.
+                // one, the window text is not empty and it is 
+                // concatenated with the value of the temporary text 
+                // buffer.
                 // If it is equal to one it means that it is empty, so 
                 // the text output is just the value of the tempory 
                 // text buffer.
                 if (wndTextLength > 1) {
                     // The length of the new text is the length of the 
-                    // window text in addition to the tempory text buffer.
-                    // The array size is increade by three characters, two 
-                    // for a linebreak "\r\n" and one for the null 
-                    // terminator "\0".
+                    // window text in addition to the tempory text 
+                    // buffer.
+                    // The array size is increased by three 
+                    // characters, two for a linebreak "\r\n" and one 
+                    // for the null terminator "\0".
                     textLength = wndTextLength + 2 + wcslen(tempTextBuffer) + 1;
                     textOutput = new wchar_t[textLength];
 

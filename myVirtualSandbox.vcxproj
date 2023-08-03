@@ -159,7 +159,15 @@
   <ItemGroup>
     <ClInclude Include="AppFunctions.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="UiLayout.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="myVirtualSandbox.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ResetOutputBitmap.bmp" />
+    <Image Include="ResetOutputBitmapSelected.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

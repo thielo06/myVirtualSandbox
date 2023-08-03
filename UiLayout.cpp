@@ -38,7 +38,7 @@ UiObjects::UiObjects() {
         // Add "ES_READONLY" to make it unaccessible for the user. 
         // Take note that you have to handle "WM_CTLCOLORSTATIC" 
         // message then.
-        WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
+        WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL,
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET,
         CANVAS_WIDTH,
@@ -68,7 +68,7 @@ UiObjects::UiObjects() {
     };
     Objects.push_back(&Button1);
 
-    Button2 = {
+    CloseApplicationButton = {
         L"BUTTON",
         L"Close",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
@@ -81,6 +81,20 @@ UiObjects::UiObjects() {
         ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
+    Objects.push_back(&CloseApplicationButton);
 
-    Objects.push_back(&Button2);
+    ResetOutputButton = {
+        L"BUTTON",
+        L"Reset Output",
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+        CANVAS_HOR_OFFSET,
+        CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET + OUTPUT_HEIGTH,
+        SYMBOL_BUTTON_WIDTH,
+        SYMBOL_BUTTON_HEIGHT,
+        (HMENU)102,
+        NULL,
+        ObjectClass::Button,
+        MyColors.ElevatedColorDarkTheme
+    };
+    Objects.push_back(&ResetOutputButton);
 }

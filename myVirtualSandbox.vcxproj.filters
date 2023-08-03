@@ -35,5 +35,21 @@
     <ClInclude Include="AppFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="myVirtualSandbox.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ResetOutputBitmap.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ResetOutputBitmapSelected.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

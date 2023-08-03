@@ -38,7 +38,7 @@ public:
     };
 
     // Declare the user interface objects.
-    Object Canvas, Output, Button1, Button2;
+    Object Canvas, Output, Button1, CloseApplicationButton, ResetOutputButton;
 
     // Declare a vector class as a container of pointers to the 
     // "Object"-Elements.

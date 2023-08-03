@@ -17,8 +17,6 @@ void AppFunctions::FrameRectangle(HDC hDeviceContext, RECT rectangle, HBRUSH hBr
 }
 
 void AppFunctions::DrawPoint(HWND hWnd, POINT pt, COLORREF penColor) {
-    Diagnostics::Debug::Write(pt.x + " " + pt.y + "\n");
-
     HDC hDeviceContext;
 
     hDeviceContext = GetDC(hWnd);
