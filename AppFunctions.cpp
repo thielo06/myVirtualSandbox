@@ -1,35 +1,41 @@
 #include "AppFunctions.h"
 #include "Header.h"
 
-void AppFunctions::FrameRectangle(HDC hDeviceContext, RECT rectangle, HBRUSH hBrush) {
-    RECT frameRect;
-
-    frameRect.left = rectangle.left - 1;
-    frameRect.top = rectangle.top - 1;
-    frameRect.right = rectangle.right + 1;
-    frameRect.bottom = rectangle.bottom + 1;
-
-    FrameRect(
-        hDeviceContext,
-        &frameRect,
-        hBrush
-    );
+void AppFunctions::InitializeXmlDocument() {
+    XmlDocument^ doc = gcnew XmlDocument();
+    doc->LoadXml("<root></root>");
+    doc->Save("dataCache.xml");
 }
 
-void AppFunctions::DrawPoint(HWND hWnd, POINT pt, COLORREF penColor) {
+void AppFunctions::DrawPoint(HWND hWnd, POINT point, COLORREF penColor) {
     HDC hDeviceContext;
 
     hDeviceContext = GetDC(hWnd);
 
-    SetPixel(hDeviceContext, pt.x, pt.y, penColor);
+    SetPixel(hDeviceContext, point.x, point.y, penColor);
+
+    // Load data cache file and write point coordinates to it.
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    xmlDoc->Load("dataCache.xml");
+
+    XmlElement^ xmlPoint;
+
+    xmlPoint = AppFunctions::SerializePoint(xmlDoc, point);
+
+    xmlDoc->DocumentElement->AppendChild(xmlPoint);
+
+    xmlDoc->Save("dataCache.xml");
 }
 
-bool AppFunctions::Contains(RECT rect, POINT pt) {
-    if (pt.x < rect.left || pt.x >= rect.right) {
-        return false;
-    }
-    if (pt.y < rect.top || pt.y >= rect.bottom) {
-        return false;
-    }
-    return true;
+XmlElement^ AppFunctions::SerializePoint(XmlDocument^ xmlDoc, POINT point) {
+    XmlElement^ xmlPoint = xmlDoc->CreateElement("point");
+
+    // New elements are "pushed" into the XML-Structure from above, 
+    // respectively attributes are "pushed" from the left. Hence it is 
+    // necessary to set the attribute that shall occure at the very 
+    // left at first.
+    xmlPoint->SetAttribute("y", point.y.ToString());
+    xmlPoint->SetAttribute("x", point.x.ToString());
+
+    return xmlPoint;
 }

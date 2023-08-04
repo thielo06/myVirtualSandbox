@@ -9,6 +9,7 @@
 #using <System.Xml.dll>
 
 using namespace System;
+using namespace System::Xml;
 
 // Global constants
 const int CANVAS_HOR_OFFSET = 10;

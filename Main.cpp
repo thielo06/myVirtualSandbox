@@ -151,6 +151,8 @@ LRESULT CALLBACK wndProc(
 
             RegisterClass(&canvasWndClass);
 
+            AppFunctions::InitializeXmlDocument();
+
             // The following loop iterates through the container of user 
             // interface objects.
             for (int i = 0; i < (int)MyObjects.Objects.size(); i++) {
