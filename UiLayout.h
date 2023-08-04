@@ -1,6 +1,5 @@
 #pragma once
 
-#include <dwmapi.h>
 #include <string>
 #include <vector>
 
@@ -21,8 +20,6 @@ public:
 static class UiObjects
 {
 public:
-    enum ObjectClass { Custom, Button };
-
     struct Object {
         LPWSTR lpClassName;
         LPWSTR lpWindowName;
@@ -33,7 +30,6 @@ public:
         LONG nHeigth;
         HMENU hMenu;
         HWND hObjectWnd;
-        ObjectClass objectType;
         COLORREF color;
     };
 

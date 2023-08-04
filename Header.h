@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Resource.h"
+#include <dwmapi.h>
 #include <windows.h>
 #include <windowsx.h>
 
+#include "Resource.h"
 
 #using <System.dll>
 #using <System.Xml.dll>

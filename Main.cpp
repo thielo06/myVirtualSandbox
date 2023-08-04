@@ -132,7 +132,6 @@ LRESULT CALLBACK wndProc(
 
         case WM_CREATE:
         {
-            HANDLE hImage;
             HFONT hFont;
             HINSTANCE hInstance;
             WNDCLASS canvasWndClass;
@@ -270,7 +269,6 @@ LRESULT CALLBACK wndProc(
                     HBITMAP hBitmap;
                     HDC hdcMemDC;
                     HGDIOBJ oldBitmap;
-                    HRSRC hImageResource;
                     LPWSTR bitmapResource;
 
                     // Create a compatible device context in reference 
@@ -299,6 +297,8 @@ LRESULT CALLBACK wndProc(
                     // Read graphical information from the handle 
                     // and write it to the buffer at specified 
                     // location.
+                    bitmap = {};
+
                     GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
                     // Perform a bit block transfer between the source 
@@ -415,9 +415,7 @@ LRESULT CALLBACK wndProc(
 
         case WM_CTLCOLOREDIT:
         {
-            HBRUSH hBrush;
             HDC hEditControl;
-            HFONT hItemFont;
 
             hEditControl = (HDC)wParam;
 
@@ -448,17 +446,42 @@ LRESULT CALLBACK canvasWndProc(
         // itself or the operating system.
         case WM_PAINT:
         {
+            HBRUSH hBrush;
+            HDC hDeviceContext;
+            HPEN hPen;
+
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
             // left and lower right corners of the rectangle in wich 
             // the painting is requested.
             PAINTSTRUCT paintStruct;
-            HDC hDeviceContext;
+            POINT origin;
 
-            HBRUSH hBrush;
+            int nLines, lineLength, lineWidth, gapLength, dotLength, xMove;
 
             hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
+
             hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+
+            hPen = CreatePen(PS_SOLID, 1, MyColors.TextColorDarkTheme);
+            SelectObject(hDeviceContext, hPen);
+
+            origin = {
+                paintStruct.rcPaint.right / 2,
+                paintStruct.rcPaint.bottom / 2
+            };
+
+            lineWidth = 1;
+
+            // According to ISO 128-20 ...
+            lineLength = 24 * lineWidth;
+            gapLength = 3 * lineWidth;
+            0.5 * lineWidth > 1 ? dotLength = (int)round(0.5 * lineWidth) : dotLength = 1;
+
+            // Number of "long lines" in dependance to the line width 
+            // that fit in the canvas area.
+            nLines = CANVAS_WIDTH / (lineLength + 2 * gapLength + dotLength) + 1;
+            Diagnostics::Debug::WriteLine(nLines.ToString());
 
             // Paint application background.
             FillRect(
@@ -466,6 +489,20 @@ LRESULT CALLBACK canvasWndProc(
                 &paintStruct.rcPaint,
                 hBrush
             );
+
+            for (int i = 0; i < nLines; i++) {
+                xMove = i * (lineLength + 2 * gapLength + dotLength);
+                MoveToEx(hDeviceContext, xMove, origin.y, NULL);
+
+                xMove += lineLength;
+                LineTo(hDeviceContext, xMove, origin.y);
+
+                xMove += gapLength;
+                MoveToEx( hDeviceContext, xMove, origin.y, NULL);
+
+                xMove += dotLength;
+                LineTo(hDeviceContext, xMove, origin.y);
+            }
 
             DeleteObject(hBrush);
 
@@ -517,12 +554,12 @@ LRESULT CALLBACK canvasWndProc(
                     // The array size is increased by three 
                     // characters, two for a linebreak "\r\n" and one 
                     // for the null terminator "\0".
-                    textLength = wndTextLength + 2 + wcslen(tempTextBuffer) + 1;
+                    textLength = wndTextLength + 2 + (int)wcslen(tempTextBuffer) + 1;
                     textOutput = new wchar_t[textLength];
 
                     wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
                 } else {
-                    textLength = wcslen(tempTextBuffer) + 1;
+                    textLength = (int)wcslen(tempTextBuffer) + 1;
                     textOutput = new wchar_t[textLength];
 
                     wsprintfW(textOutput, L"%s", tempTextBuffer);

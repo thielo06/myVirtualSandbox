@@ -27,7 +27,6 @@ UiObjects::UiObjects() {
         CANVAS_HEIGTH,
         (HMENU)-1,
         NULL,
-        ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&Canvas);
@@ -45,7 +44,6 @@ UiObjects::UiObjects() {
         OUTPUT_HEIGTH,
         (HMENU)200,
         NULL,
-        ObjectClass::Custom,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&Output);
@@ -63,7 +61,6 @@ UiObjects::UiObjects() {
         BUTTON_HEIGTH,
         (HMENU)100,
         NULL,
-        ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&Button1);
@@ -78,7 +75,6 @@ UiObjects::UiObjects() {
         BUTTON_HEIGTH,
         (HMENU)101,
         NULL,
-        ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&CloseApplicationButton);
@@ -93,7 +89,6 @@ UiObjects::UiObjects() {
         SYMBOL_BUTTON_HEIGHT,
         (HMENU)102,
         NULL,
-        ObjectClass::Button,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&ResetOutputButton);
