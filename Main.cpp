@@ -481,7 +481,6 @@ LRESULT CALLBACK canvasWndProc(
             // Number of "long lines" in dependance to the line width 
             // that fit in the canvas area.
             nLines = CANVAS_WIDTH / (lineLength + 2 * gapLength + dotLength) + 1;
-            Diagnostics::Debug::WriteLine(nLines.ToString());
 
             // Paint application background.
             FillRect(
