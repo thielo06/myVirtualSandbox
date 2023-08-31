@@ -38,7 +38,7 @@ public:
 
     enum objectControlId
     {
-        CanvasId = 100,
+        CanvasId = 200,
         OutputId,
         Button1Id,
         CloseApplicationButtonId,

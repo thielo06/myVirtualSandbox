@@ -267,13 +267,13 @@ LRESULT CALLBACK wndProc(
                 {
                     BITMAP bitmap;
                     HBITMAP hBitmap;
-                    HDC hdcMemDC;
-                    HGDIOBJ oldBitmap;
+                    HDC hMemoryDeviceContext;
+                    HGDIOBJ hOldBitmap;
                     LPWSTR bitmapResource;
 
                     // Create a compatible device context in reference 
                     // to the device context of item structure.
-                    hdcMemDC = CreateCompatibleDC(hDeviceContext);
+                    hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
 
                     if (itemState & ODS_SELECTED) {
                         bitmapResource = MAKEINTRESOURCE(IDB_BITMAP2);
@@ -282,23 +282,19 @@ LRESULT CALLBACK wndProc(
                     }
 
                     // Create a handle from the bitmap resource.
-                    hBitmap = (HBITMAP)LoadImageW(
+                    hBitmap = LoadBitmapW(
                         GetModuleHandle(NULL),
-                        bitmapResource,
-                        IMAGE_BITMAP,
-                        0, 0,
-                        NULL
+                        bitmapResource
                     );
 
-                    // Select the bitmap handle to the source device 
+                    // Select the bitmap handle to the memory device 
                     // context and store a copy of it in a variable.
-                    oldBitmap = SelectObject(hdcMemDC, hBitmap);
+                    hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
 
                     // Read graphical information from the handle 
                     // and write it to the buffer at specified 
                     // location.
                     bitmap = {};
-
                     GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
                     // Perform a bit block transfer between the source 
@@ -309,15 +305,15 @@ LRESULT CALLBACK wndProc(
                         0, 0,
                         bitmap.bmWidth,
                         bitmap.bmHeight,
-                        hdcMemDC,
+                        hMemoryDeviceContext,
                         0, 0,
                         SRCCOPY
                     );
 
                     // Select the original bitmap handle to the source 
                     // device context and delete the object.
-                    SelectObject(hdcMemDC, oldBitmap);
-                    DeleteDC(hdcMemDC);
+                    SelectObject(hMemoryDeviceContext, hOldBitmap);
+                    DeleteDC(hMemoryDeviceContext);
 
                     break;
                 }
@@ -441,46 +437,34 @@ LRESULT CALLBACK canvasWndProc(
 ) {
     switch (uMsg)
     {
+        case WM_CREATE:
+        {
+            System::Diagnostics::Debug::WriteLine("Load bitmap.");
+            break;
+        }
+
         // To paint the window the "WM_PAINT" message has to be 
         // received by the window. It is sent by either the program 
         // itself or the operating system.
         case WM_PAINT:
         {
+            BITMAP bitmap;
+            HBITMAP hBitmap;
             HBRUSH hBrush;
-            HDC hDeviceContext;
-            HPEN hPen;
+            HGDIOBJ hOldBitmap;
+            HDC hDeviceContext, hMemoryDeviceContext;
+            LONG bitmapX, bitmapY;
+            LPWSTR bitmapResource;
 
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
             // left and lower right corners of the rectangle in wich 
             // the painting is requested.
             PAINTSTRUCT paintStruct;
-            POINT origin;
-
-            int nLines, lineLength, lineWidth, gapLength, dotLength, xMove;
 
             hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
 
             hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
-
-            hPen = CreatePen(PS_SOLID, 1, MyColors.TextColorDarkTheme);
-            SelectObject(hDeviceContext, hPen);
-
-            origin = {
-                paintStruct.rcPaint.right / 2,
-                paintStruct.rcPaint.bottom / 2
-            };
-
-            lineWidth = 1;
-
-            // According to ISO 128-20 ...
-            lineLength = 24 * lineWidth;
-            gapLength = 3 * lineWidth;
-            0.5 * lineWidth > 1 ? dotLength = (int)round(0.5 * lineWidth) : dotLength = 1;
-
-            // Number of "long lines" in dependance to the line width 
-            // that fit in the canvas area.
-            nLines = CANVAS_WIDTH / (lineLength + 2 * gapLength + dotLength) + 1;
 
             // Paint application background.
             FillRect(
@@ -489,30 +473,63 @@ LRESULT CALLBACK canvasWndProc(
                 hBrush
             );
 
-            for (int i = 0; i < nLines; i++) {
-                xMove = i * (lineLength + 2 * gapLength + dotLength);
-                MoveToEx(hDeviceContext, xMove, origin.y, NULL);
-
-                xMove += lineLength;
-                LineTo(hDeviceContext, xMove, origin.y);
-
-                xMove += gapLength;
-                MoveToEx( hDeviceContext, xMove, origin.y, NULL);
-
-                xMove += dotLength;
-                LineTo(hDeviceContext, xMove, origin.y);
-            }
-
             DeleteObject(hBrush);
 
-            EndPaint(hCanvasWnd, &paintStruct);
-
-            if (lParam!=NULL) {
-                int xPos = GET_X_LPARAM(lParam);
-                int yPos = GET_Y_LPARAM(lParam);
-                
-                System::Diagnostics::Debug::WriteLine(xPos.ToString(), yPos.ToString());
+            if (lParam == NULL) {
+                break;
             }
+
+            bitmapX = GET_X_LPARAM(lParam);
+            bitmapY = GET_Y_LPARAM(lParam);
+
+            bitmapResource = MAKEINTRESOURCE(IDB_BITMAP3);
+
+            // Create a handle from the bitmap resource.
+            hBitmap = LoadBitmapW(
+                GetModuleHandle(NULL),
+                bitmapResource
+            );
+
+            if (hBitmap == NULL) {
+                MessageBox(hCanvasWnd, L"Could not load bitmap!", L"Error", MB_OK | MB_ICONEXCLAMATION);
+            }
+
+            // Create a compatible device context in reference 
+            // to the device context of item structure.
+            hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
+
+            // Select the bitmap handle to the memory device 
+            // context and store a copy of it in a variable.
+            // The return value is, if the funtion succeeds and the 
+            // selected object is not a region, is a handle to the 
+            // object that is being replaced.
+            hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
+
+            // Read graphical information from the handle 
+            // and write it to the buffer at specified 
+            // location.
+            bitmap = {};
+            GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+            // Perform a bit block transfer between the source 
+            // device context and the device context of the 
+            // item structure.
+            BitBlt(
+                hDeviceContext,
+                bitmapX - bitmap.bmWidth/2, bitmapY - bitmap.bmHeight/2,
+                bitmap.bmWidth,
+                bitmap.bmHeight,
+                hMemoryDeviceContext,
+                0, 0,
+                SRCCOPY
+            );
+
+            // Select the original bitmap handle to the source 
+            // device context and delete the object.
+            SelectObject(hMemoryDeviceContext, hOldBitmap);
+            DeleteDC(hMemoryDeviceContext);
+
+            EndPaint(hCanvasWnd, &paintStruct);
 
             break;
         }
@@ -528,8 +545,9 @@ LRESULT CALLBACK canvasWndProc(
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
 
-            AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
-
+            // AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
+            
+            InvalidateRect(hCanvasWnd, NULL, FALSE);
             SendMessage(hCanvasWnd, WM_PAINT, NULL, lParam);
 
             hOutputWnd = MyObjects.Output.hObjectWnd;
@@ -575,9 +593,13 @@ LRESULT CALLBACK canvasWndProc(
 
                 SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
             }
-            else {
 
-            }
+            break;
+        }
+
+        case WM_DESTROY:
+        {
+
             break;
         }
     }

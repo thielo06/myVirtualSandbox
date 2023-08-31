@@ -166,6 +166,7 @@
     <ResourceCompile Include="myVirtualSandbox.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Point.bmp" />
     <Image Include="ResetOutputBitmap.bmp" />
     <Image Include="ResetOutputBitmapSelected.bmp" />
   </ItemGroup>
