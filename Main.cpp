@@ -102,13 +102,13 @@ LRESULT CALLBACK wndProc(
             controlIdentifier = LOWORD(wParam);
 
             switch (controlIdentifier) {
-                case 100:
+                case MyObjects.Button1Id:
                 {
                     System::Diagnostics::Debug::WriteLine("Button1");
 
                     break;
                 }
-                case 101:
+                case MyObjects.CloseApplicationButtonId:
                 {
                     System::Diagnostics::Debug::WriteLine("Close Window ...");
 
@@ -116,7 +116,7 @@ LRESULT CALLBACK wndProc(
 
                     break;
                 }
-                case 102:
+                case MyObjects.ResetOutputButtonId:
                 {
                     HWND hOutputWnd;
                     
@@ -213,7 +213,7 @@ LRESULT CALLBACK wndProc(
             itemState = itemStructure->itemState;
 
             switch (controlIdentifier) {
-                case 100:
+                case MyObjects.Button1Id:
                 {
                     // Following the fallthrough behaviour of C++, the 
                     // code that applies to the lower case also 
@@ -221,7 +221,7 @@ LRESULT CALLBACK wndProc(
                     // Note that the "break" statement is missing in 
                     // this case.
                 }
-                case 101:
+                case MyObjects.CloseApplicationButtonId:
                 {
                     HBRUSH hBrush;
                     LPWSTR lpBuffer;
@@ -263,7 +263,7 @@ LRESULT CALLBACK wndProc(
 
                     break;
                 }
-                case 102:
+                case MyObjects.ResetOutputButtonId:
                 {
                     BITMAP bitmap;
                     HBITMAP hBitmap;
@@ -507,6 +507,13 @@ LRESULT CALLBACK canvasWndProc(
 
             EndPaint(hCanvasWnd, &paintStruct);
 
+            if (lParam!=NULL) {
+                int xPos = GET_X_LPARAM(lParam);
+                int yPos = GET_Y_LPARAM(lParam);
+                
+                System::Diagnostics::Debug::WriteLine(xPos.ToString(), yPos.ToString());
+            }
+
             break;
         }
 
@@ -522,6 +529,8 @@ LRESULT CALLBACK canvasWndProc(
             point.y = GET_Y_LPARAM(lParam);
 
             AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
+
+            SendMessage(hCanvasWnd, WM_PAINT, NULL, lParam);
 
             hOutputWnd = MyObjects.Output.hObjectWnd;
 

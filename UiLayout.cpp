@@ -25,7 +25,7 @@ UiObjects::UiObjects() {
         CANVAS_VER_OFFSET,
         CANVAS_WIDTH,
         CANVAS_HEIGTH,
-        (HMENU)-1,
+        (HMENU)CanvasId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
@@ -42,7 +42,7 @@ UiObjects::UiObjects() {
         CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET,
         CANVAS_WIDTH,
         OUTPUT_HEIGTH,
-        (HMENU)200,
+        (HMENU)OutputId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
@@ -59,7 +59,7 @@ UiObjects::UiObjects() {
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
         BUTTON_HEIGTH,
-        (HMENU)100,
+        (HMENU)Button1Id,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
@@ -73,7 +73,7 @@ UiObjects::UiObjects() {
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
         BUTTON_HEIGTH,
-        (HMENU)101,
+        (HMENU)CloseApplicationButtonId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
@@ -87,7 +87,7 @@ UiObjects::UiObjects() {
         CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET + OUTPUT_HEIGTH,
         SYMBOL_BUTTON_WIDTH,
         SYMBOL_BUTTON_HEIGHT,
-        (HMENU)102,
+        (HMENU)ResetOutputButtonId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };

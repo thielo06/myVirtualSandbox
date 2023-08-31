@@ -36,6 +36,15 @@ public:
     // Declare the user interface objects.
     Object Canvas, Output, Button1, CloseApplicationButton, ResetOutputButton;
 
+    enum objectControlId
+    {
+        CanvasId = 100,
+        OutputId,
+        Button1Id,
+        CloseApplicationButtonId,
+        ResetOutputButtonId
+    };
+
     // Declare a vector class as a container of pointers to the 
     // "Object"-Elements.
     std::vector<Object*> Objects;
