@@ -276,44 +276,10 @@ LRESULT CALLBACK wndProc(
                     hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
 
                     if (itemState & ODS_SELECTED) {
-                        bitmapResource = MAKEINTRESOURCE(IDB_BITMAP2);
+                        AppFunctions::DrawBitmap(IDB_BITMAP2, hDeviceContext, 0, 0, L"nw");
                     } else {
-                        bitmapResource = MAKEINTRESOURCE(IDB_BITMAP1);
+                        AppFunctions::DrawBitmap(IDB_BITMAP1, hDeviceContext, 0, 0, L"nw");
                     }
-
-                    // Create a handle from the bitmap resource.
-                    hBitmap = LoadBitmapW(
-                        GetModuleHandle(NULL),
-                        bitmapResource
-                    );
-
-                    // Select the bitmap handle to the memory device 
-                    // context and store a copy of it in a variable.
-                    hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
-
-                    // Read graphical information from the handle 
-                    // and write it to the buffer at specified 
-                    // location.
-                    bitmap = {};
-                    GetObject(hBitmap, sizeof(bitmap), &bitmap);
-
-                    // Perform a bit block transfer between the source 
-                    // device context and the device context of the 
-                    // item structure.
-                    BitBlt(
-                        hDeviceContext,
-                        0, 0,
-                        bitmap.bmWidth,
-                        bitmap.bmHeight,
-                        hMemoryDeviceContext,
-                        0, 0,
-                        SRCCOPY
-                    );
-
-                    // Select the original bitmap handle to the source 
-                    // device context and delete the object.
-                    SelectObject(hMemoryDeviceContext, hOldBitmap);
-                    DeleteDC(hMemoryDeviceContext);
 
                     break;
                 }
@@ -475,6 +441,8 @@ LRESULT CALLBACK canvasWndProc(
 
             DeleteObject(hBrush);
 
+            AppFunctions::DeserializePoints(hDeviceContext);
+
             if (lParam == NULL) {
                 break;
             }
@@ -482,52 +450,16 @@ LRESULT CALLBACK canvasWndProc(
             bitmapX = GET_X_LPARAM(lParam);
             bitmapY = GET_Y_LPARAM(lParam);
 
-            bitmapResource = MAKEINTRESOURCE(IDB_BITMAP3);
+            if (AppFunctions::DrawBitmap(IDB_BITMAP3, hDeviceContext, bitmapX, bitmapY, L"c")) {
+                POINT point;
 
-            // Create a handle from the bitmap resource.
-            hBitmap = LoadBitmapW(
-                GetModuleHandle(NULL),
-                bitmapResource
-            );
+                point = {
+                    bitmapX,
+                    bitmapY
+                };
 
-            if (hBitmap == NULL) {
-                MessageBox(hCanvasWnd, L"Could not load bitmap!", L"Error", MB_OK | MB_ICONEXCLAMATION);
+                AppFunctions::StorePoint(point);
             }
-
-            // Create a compatible device context in reference 
-            // to the device context of item structure.
-            hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
-
-            // Select the bitmap handle to the memory device 
-            // context and store a copy of it in a variable.
-            // The return value is, if the funtion succeeds and the 
-            // selected object is not a region, is a handle to the 
-            // object that is being replaced.
-            hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
-
-            // Read graphical information from the handle 
-            // and write it to the buffer at specified 
-            // location.
-            bitmap = {};
-            GetObject(hBitmap, sizeof(bitmap), &bitmap);
-
-            // Perform a bit block transfer between the source 
-            // device context and the device context of the 
-            // item structure.
-            BitBlt(
-                hDeviceContext,
-                bitmapX - bitmap.bmWidth/2, bitmapY - bitmap.bmHeight/2,
-                bitmap.bmWidth,
-                bitmap.bmHeight,
-                hMemoryDeviceContext,
-                0, 0,
-                SRCCOPY
-            );
-
-            // Select the original bitmap handle to the source 
-            // device context and delete the object.
-            SelectObject(hMemoryDeviceContext, hOldBitmap);
-            DeleteDC(hMemoryDeviceContext);
 
             EndPaint(hCanvasWnd, &paintStruct);
 
