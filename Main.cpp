@@ -265,16 +265,6 @@ LRESULT CALLBACK wndProc(
                 }
                 case MyObjects.ResetOutputButtonId:
                 {
-                    BITMAP bitmap;
-                    HBITMAP hBitmap;
-                    HDC hMemoryDeviceContext;
-                    HGDIOBJ hOldBitmap;
-                    LPWSTR bitmapResource;
-
-                    // Create a compatible device context in reference 
-                    // to the device context of item structure.
-                    hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
-
                     if (itemState & ODS_SELECTED) {
                         AppFunctions::DrawBitmap(IDB_BITMAP2, hDeviceContext, 0, 0, L"nw");
                     } else {
@@ -414,13 +404,9 @@ LRESULT CALLBACK canvasWndProc(
         // itself or the operating system.
         case WM_PAINT:
         {
-            BITMAP bitmap;
-            HBITMAP hBitmap;
             HBRUSH hBrush;
-            HGDIOBJ hOldBitmap;
-            HDC hDeviceContext, hMemoryDeviceContext;
+            HDC hDeviceContext;
             LONG bitmapX, bitmapY;
-            LPWSTR bitmapResource;
 
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
