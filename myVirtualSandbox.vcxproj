@@ -166,9 +166,11 @@
     <ResourceCompile Include="myVirtualSandbox.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Point.bmp" />
-    <Image Include="ResetOutputBitmap.bmp" />
-    <Image Include="ResetOutputBitmapSelected.bmp" />
+    <Image Include="AddPointButton.bmp" />
+    <Image Include="AddPointButtonSelected.bmp" />
+    <Image Include="Resources\Point.bmp" />
+    <Image Include="Resources\ResetOutputBitmap.bmp" />
+    <Image Include="Resources\ResetOutputBitmapSelected.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

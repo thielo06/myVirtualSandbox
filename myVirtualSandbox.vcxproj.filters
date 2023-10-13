@@ -45,13 +45,19 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="ResetOutputBitmap.bmp">
+    <Image Include="Resources\Point.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="ResetOutputBitmapSelected.bmp">
+    <Image Include="Resources\ResetOutputBitmap.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Point.bmp">
+    <Image Include="Resources\ResetOutputBitmapSelected.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="AddPointButton.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="AddPointButtonSelected.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

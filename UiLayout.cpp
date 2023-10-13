@@ -24,7 +24,7 @@ UiObjects::UiObjects() {
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         CANVAS_WIDTH,
-        CANVAS_HEIGTH,
+        CANVAS_HEIGHT,
         (HMENU)CanvasId,
         NULL,
         MyColors.ElevatedColorDarkTheme
@@ -39,31 +39,31 @@ UiObjects::UiObjects() {
         // message then.
         WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL,
         CANVAS_HOR_OFFSET,
-        CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET,
+        CANVAS_VER_OFFSET + CANVAS_HEIGHT + OUTPUT_VER_OFFSET,
         CANVAS_WIDTH,
-        OUTPUT_HEIGTH,
+        OUTPUT_HEIGHT,
         (HMENU)OutputId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&Output);
 
-    Button1 = {
+    AddPointButton = {
         L"BUTTON",
         L"Button1",
         // With the 'BS_OWNERDRAW'-Option the owner 
         // window receives a 'WM_DRAWITEM'-Message when
         // a visual aspect of the button has changed.
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH + BUTTON_HOR_OFFSET,
+        CANVAS_HOR_OFFSET + CANVAS_WIDTH,
         CANVAS_VER_OFFSET,
-        BUTTON_WIDTH,
-        BUTTON_HEIGTH,
-        (HMENU)Button1Id,
+        SYMBOL_BUTTON_WIDTH,
+        SYMBOL_BUTTON_HEIGHT,
+        (HMENU)AddPointButtonId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&Button1);
+    Objects.push_back(&AddPointButton);
 
     CloseApplicationButton = {
         L"BUTTON",
@@ -72,7 +72,7 @@ UiObjects::UiObjects() {
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + BUTTON_HOR_OFFSET + BUTTON_WIDTH + BUTTON_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
-        BUTTON_HEIGTH,
+        BUTTON_HEIGHT,
         (HMENU)CloseApplicationButtonId,
         NULL,
         MyColors.ElevatedColorDarkTheme
@@ -84,7 +84,7 @@ UiObjects::UiObjects() {
         L"Reset Output",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET,
-        CANVAS_VER_OFFSET + CANVAS_HEIGTH + OUTPUT_VER_OFFSET + OUTPUT_HEIGTH,
+        CANVAS_VER_OFFSET + CANVAS_HEIGHT + OUTPUT_VER_OFFSET + OUTPUT_HEIGHT,
         SYMBOL_BUTTON_WIDTH,
         SYMBOL_BUTTON_HEIGHT,
         (HMENU)ResetOutputButtonId,
@@ -92,4 +92,6 @@ UiObjects::UiObjects() {
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&ResetOutputButton);
+
+
 }

@@ -102,7 +102,7 @@ LRESULT CALLBACK wndProc(
             controlIdentifier = LOWORD(wParam);
 
             switch (controlIdentifier) {
-                case MyObjects.Button1Id:
+                case MyObjects.AddPointButtonId:
                 {
                     System::Diagnostics::Debug::WriteLine("Button1");
 
@@ -213,13 +213,22 @@ LRESULT CALLBACK wndProc(
             itemState = itemStructure->itemState;
 
             switch (controlIdentifier) {
-                case MyObjects.Button1Id:
+                case MyObjects.AddPointButtonId:
                 {
                     // Following the fallthrough behaviour of C++, the 
                     // code that applies to the lower case also 
                     // applies when this case is called.
                     // Note that the "break" statement is missing in 
                     // this case.
+
+                    if (itemState & ODS_SELECTED) {
+                        AppFunctions::DrawBitmap(IDB_BITMAP5, hDeviceContext, 0, 0, L"nw");
+                    }
+                    else {
+                        AppFunctions::DrawBitmap(IDB_BITMAP4, hDeviceContext, 0, 0, L"nw");
+                    }
+
+                    break;
                 }
                 case MyObjects.CloseApplicationButtonId:
                 {
