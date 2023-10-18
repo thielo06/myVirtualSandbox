@@ -34,13 +34,15 @@ public:
     };
 
     // Declare the user interface objects.
-    Object Canvas, Output, AddPointButton, CloseApplicationButton, ResetOutputButton;
+    Object Canvas, Output, AddPointButton, SelectPointButton, CloseApplicationButton, ResetOutputButton;
 
+    // Initialize the user interface objects control identifiers.
     enum objectControlId
     {
-        CanvasId = 200,
+        CanvasId,
         OutputId,
         AddPointButtonId,
+        SelectPointButtonId,
         CloseApplicationButtonId,
         ResetOutputButtonId
     };

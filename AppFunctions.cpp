@@ -1,12 +1,6 @@
 #include "AppFunctions.h"
 #include "Header.h"
 
-void AppFunctions::InitializeXmlDocument() {
-    XmlDocument^ doc = gcnew XmlDocument();
-    doc->LoadXml("<root></root>");
-    doc->Save("dataCache.xml");
-}
-
 int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin = L"c") {
     BITMAP bitmap;
     HBITMAP hBitmap;
@@ -69,6 +63,37 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
     return status;
 }
 
+void AppFunctions::DeserializePoints(HDC hDeviceContext) {
+    // Load data cache file and write point coordinates to it.
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    xmlDoc->Load("dataCache.xml");
+
+    XmlNodeList^ elemList = xmlDoc->GetElementsByTagName("point");
+
+    if (elemList->Count) {
+        for (int i = 0; i < elemList->Count; i++) {
+            INT32 xValue, yValue;
+            POINT point;
+
+            Int32::TryParse(elemList[i]->Attributes[0]->Value, xValue);
+            Int32::TryParse(elemList[i]->Attributes[1]->Value, yValue);
+
+            point = {
+                xValue,
+                yValue
+            };
+
+            DrawBitmap(IDB_BITMAP3, hDeviceContext, point.x, point.y);
+        }
+    }
+}
+
+void AppFunctions::InitializeXmlDocument() {
+    XmlDocument^ doc = gcnew XmlDocument();
+    doc->LoadXml("<root></root>");
+    doc->Save("dataCache.xml");
+}
+
 void AppFunctions::StorePoint(POINT point) {
     // Load data cache file and write point coordinates to it.
     XmlDocument^ xmlDoc = gcnew XmlDocument();
@@ -94,29 +119,4 @@ XmlElement^ AppFunctions::SerializePoint(XmlDocument^ xmlDoc, POINT point) {
     xmlPoint->SetAttribute("y", point.y.ToString());
 
     return xmlPoint;
-}
-
-void AppFunctions::DeserializePoints(HDC hDeviceContext) {
-    // Load data cache file and write point coordinates to it.
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
-    xmlDoc->Load("dataCache.xml");
-
-    XmlNodeList^ elemList = xmlDoc->GetElementsByTagName("point");
-
-    if (elemList->Count) {
-        for (int i = 0; i < elemList->Count; i++) {
-            INT32 xValue, yValue;
-            POINT point;
-
-            Int32::TryParse(elemList[i]->Attributes[0]->Value, xValue);
-            Int32::TryParse(elemList[i]->Attributes[1]->Value, yValue);
-
-            point = {
-                xValue,
-                yValue
-            };
-
-            DrawBitmap(IDB_BITMAP3, hDeviceContext, point.x, point.y);
-        }
-    }
 }

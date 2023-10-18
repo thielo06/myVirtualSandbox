@@ -104,7 +104,13 @@ LRESULT CALLBACK wndProc(
             switch (controlIdentifier) {
                 case MyObjects.AddPointButtonId:
                 {
-                    System::Diagnostics::Debug::WriteLine("Button1");
+                    currentToolState = toolState::addPoint;
+
+                    break;
+                }
+                case MyObjects.SelectPointButtonId:
+                {
+                    currentToolState = toolState::selectPoint;
 
                     break;
                 }
@@ -168,7 +174,7 @@ LRESULT CALLBACK wndProc(
                     pObject->nWidth, // Width
                     pObject->nHeigth, // Height
                     hWnd, // Parent window
-                    pObject->hMenu, // No menu.
+                    pObject->hMenu, // Corresponding menu gained from objectControlId.
                     hInstance,
                     NULL // Pointer not needed.
                 );
@@ -404,7 +410,10 @@ LRESULT CALLBACK canvasWndProc(
     {
         case WM_CREATE:
         {
+            toolState currentToolState = toolState::empty;
+
             System::Diagnostics::Debug::WriteLine("Load bitmap.");
+
             break;
         }
 
@@ -472,10 +481,24 @@ LRESULT CALLBACK canvasWndProc(
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
 
-            // AppFunctions::DrawPoint(hCanvasWnd, point, MyColors.AccentColorDarkTheme);
-            
-            InvalidateRect(hCanvasWnd, NULL, FALSE);
-            SendMessage(hCanvasWnd, WM_PAINT, NULL, lParam);
+            switch (currentToolState) 
+            {
+                case toolState::empty:
+                {
+                    break;
+                }
+                case toolState::addPoint:
+                {
+                    InvalidateRect(hCanvasWnd, NULL, FALSE);
+                    SendMessage(hCanvasWnd, WM_PAINT, NULL, lParam);
+
+                    break;
+                }
+                case toolState::selectPoint:
+                {
+                    break;
+                }
+            }
 
             hOutputWnd = MyObjects.Output.hObjectWnd;
 

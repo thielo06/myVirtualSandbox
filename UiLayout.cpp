@@ -1,6 +1,9 @@
 #include "Header.h"
 #include "UiLayout.h"
 
+// Initially define tool state as empty.
+toolState currentToolState = toolState::empty;
+
 ColorPalette::ColorPalette() {
     TextColorDarkTheme = RGB(248, 248, 248);
 
@@ -50,7 +53,7 @@ UiObjects::UiObjects() {
 
     AddPointButton = {
         L"BUTTON",
-        L"Button1",
+        L"Add button",
         // With the 'BS_OWNERDRAW'-Option the owner 
         // window receives a 'WM_DRAWITEM'-Message when
         // a visual aspect of the button has changed.
@@ -65,11 +68,28 @@ UiObjects::UiObjects() {
     };
     Objects.push_back(&AddPointButton);
 
+    SelectPointButton = {
+        L"BUTTON",
+        L"Select Button",
+        // With the 'BS_OWNERDRAW'-Option the owner 
+        // window receives a 'WM_DRAWITEM'-Message when
+        // a visual aspect of the button has changed.
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+        CANVAS_HOR_OFFSET + CANVAS_WIDTH,
+        CANVAS_VER_OFFSET + SYMBOL_BUTTON_HEIGHT,
+        SYMBOL_BUTTON_WIDTH,
+        SYMBOL_BUTTON_HEIGHT,
+        (HMENU)SelectPointButtonId,
+        NULL,
+        MyColors.ElevatedColorDarkTheme
+    };
+    Objects.push_back(&SelectPointButton);
+
     CloseApplicationButton = {
         L"BUTTON",
         L"Close",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH + BUTTON_HOR_OFFSET + BUTTON_WIDTH + BUTTON_HOR_OFFSET,
+        CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + BUTTON_HOR_OFFSET,
         CANVAS_VER_OFFSET,
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
