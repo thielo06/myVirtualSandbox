@@ -66,5 +66,8 @@
     <Image Include="Resources\SelectPointButtonSelected.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\PointSelected.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

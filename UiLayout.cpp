@@ -13,7 +13,9 @@ ColorPalette::ColorPalette() {
 
     FrameColorDarkTheme = RGB(82, 82, 82);
 
-    AccentColorDarkTheme = RGB(202, 62, 71);
+    RedAccentDarkTheme = RGB(202, 62, 71);
+
+    BlueAccentDarkTheme = RGB(12, 85, 190);
 }
 
 // Initialization of the user interface objects that are declared in 
