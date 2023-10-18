@@ -53,7 +53,7 @@ UiObjects::UiObjects() {
 
     AddPointButton = {
         L"BUTTON",
-        L"Add button",
+        L"Add Button",
         // With the 'BS_OWNERDRAW'-Option the owner 
         // window receives a 'WM_DRAWITEM'-Message when
         // a visual aspect of the button has changed.

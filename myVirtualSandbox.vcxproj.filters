@@ -54,10 +54,16 @@
     <Image Include="Resources\ResetOutputBitmapSelected.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="AddPointButton.bmp">
+    <Image Include="Resources\AddPointButton.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="AddPointButtonSelected.bmp">
+    <Image Include="Resources\AddPointButtonSelected.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\SelectPointButton.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\SelectPointButtonSelected.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

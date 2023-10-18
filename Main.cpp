@@ -236,6 +236,17 @@ LRESULT CALLBACK wndProc(
 
                     break;
                 }
+                case MyObjects.SelectPointButtonId:
+                {
+                    if (itemState & ODS_SELECTED) {
+                        AppFunctions::DrawBitmap(IDB_BITMAP7, hDeviceContext, 0, 0, L"nw");
+                    }
+                    else {
+                        AppFunctions::DrawBitmap(IDB_BITMAP6, hDeviceContext, 0, 0, L"nw");
+                    }
+
+                    break;
+                }
                 case MyObjects.CloseApplicationButtonId:
                 {
                     HBRUSH hBrush;
