@@ -435,7 +435,6 @@ LRESULT CALLBACK canvasWndProc(
         {
             HBRUSH hBrush;
             HDC hDeviceContext;
-            LONG bitmapX, bitmapY;
 
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
