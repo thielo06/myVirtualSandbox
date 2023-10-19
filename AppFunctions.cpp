@@ -80,7 +80,8 @@ int AppFunctions::SearchPointXmlDocument(POINT point) {
     XmlDocument^ xmlDoc = gcnew XmlDocument();
     String^ fileName = gcnew String(STORAGE);
 
-    int status = 1;
+    // Assign 1 as a default to the return value.
+    int returnValue = 0;
 
     // Load the XML document from the specified URL.
     xmlDoc->Load(fileName);
@@ -97,16 +98,18 @@ int AppFunctions::SearchPointXmlDocument(POINT point) {
             Int32::TryParse(node->Attributes[0]->Value, xValue);
             Int32::TryParse(node->Attributes[1]->Value, yValue);
 
-            if (xValue == point.x && yValue == point.y) {
-                element->SetAttribute("selectionState", "1");
-                xmlDoc->Save(fileName);
+            if (point.x >= xValue - 1 && point.x <= xValue + 1) {
+                if (point.y >= yValue - 1 && point.y <= yValue + 1) {
+                    element->SetAttribute("selectionState", "1");
+                    xmlDoc->Save(fileName);
 
-                status = 0;
+                    returnValue = 1;
+                }
             }
         }
     }
 
-    return status;
+    return returnValue;
 };
 
 void AppFunctions::StorePoint(POINT point) {

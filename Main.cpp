@@ -541,9 +541,57 @@ LRESULT CALLBACK canvasWndProc(
                 }
                 case toolState::selectPoint:
                 {
-                    if (!AppFunctions::SearchPointXmlDocument(point)) {
+                    // If SearchPointXmlDocument is successfull it 
+                    // does return a non-zero value and the canvas 
+                    // area is updated with a null value for lParam.
+                    // If it fails it does not return a non-zero value 
+                    // and then the selection state of all points will 
+                    // be reset before the update is done with an 
+                    // empty value for lParam.
+                    if (AppFunctions::SearchPointXmlDocument(point)) {
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
+
+                        hOutputWnd = MyObjects.Output.hObjectWnd;
+
+                        // Create a buffer with length of the window text.
+                        wndTextLength = GetWindowTextLength(hOutputWnd) + 1;
+                        wndTextBuffer = new wchar_t[wndTextLength];
+
+                        // Get the window text and write it to the buffer.
+                        GetWindowText(hOutputWnd, wndTextBuffer, wndTextLength);
+
+                        wchar_t tempTextBuffer[256];
+
+                        wsprintfW(tempTextBuffer, L"Select Point %i, %i", point.x, point.y);
+
+                        // If the length of the window text is bigger than 
+                        // one, the window text is not empty and it is 
+                        // concatenated with the value of the temporary text 
+                        // buffer.
+                        // If it is equal to one it means that it is empty, so 
+                        // the text output is just the value of the tempory 
+                        // text buffer.
+                        if (wndTextLength > 1) {
+                            // The length of the new text is the length of the 
+                            // window text in addition to the tempory text 
+                            // buffer.
+                            // The array size is increased by three 
+                            // characters, two for a linebreak "\r\n" and one 
+                            // for the null terminator "\0".
+                            textLength = wndTextLength + 2 + (int)wcslen(tempTextBuffer) + 1;
+                            textOutput = new wchar_t[textLength];
+
+                            wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
+                        }
+                        else {
+                            textLength = (int)wcslen(tempTextBuffer) + 1;
+                            textOutput = new wchar_t[textLength];
+
+                            wsprintfW(textOutput, L"%s", tempTextBuffer);
+                        }
+
+                        SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
                     } else {
                         AppFunctions::ResetSelectionState();
 
