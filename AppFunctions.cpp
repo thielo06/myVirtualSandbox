@@ -63,41 +63,58 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
     return status;
 }
 
-void AppFunctions::DeserializePoints(HDC hDeviceContext) {
-    // Load data cache file and write point coordinates to it.
+void AppFunctions::InitializeXmlDocument() {
     XmlDocument^ xmlDoc = gcnew XmlDocument();
-    xmlDoc->Load("dataCache.xml");
+    String^ fileName = gcnew String(STORAGE);
 
-    XmlNodeList^ elemList = xmlDoc->GetElementsByTagName("point");
+    xmlDoc->Load(fileName);
 
-    if (elemList->Count) {
-        for (int i = 0; i < elemList->Count; i++) {
+    // Load the XML document from the specified string and save it to 
+    // an URL.
+    xmlDoc->LoadXml("<root></root>");
+    xmlDoc->Save(fileName);
+}
+
+// Returns 0 if point is found in XML Document.
+int AppFunctions::SearchPointXmlDocument(POINT point) {
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    String^ fileName = gcnew String(STORAGE);
+
+    int status = 1;
+
+    // Load the XML document from the specified URL.
+    xmlDoc->Load(fileName);
+
+    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+
+    if (nodeList->Count) {
+        for (int i = 0; i < nodeList->Count; i++) {
+            XmlNode^ node = nodeList[i];
+            XmlElement^ element = (XmlElement^)node;
+
             INT32 xValue, yValue;
-            POINT point;
 
-            Int32::TryParse(elemList[i]->Attributes[0]->Value, xValue);
-            Int32::TryParse(elemList[i]->Attributes[1]->Value, yValue);
+            Int32::TryParse(node->Attributes[0]->Value, xValue);
+            Int32::TryParse(node->Attributes[1]->Value, yValue);
 
-            point = {
-                xValue,
-                yValue
-            };
+            if (xValue == point.x && yValue == point.y) {
+                element->SetAttribute("selectionState", "1");
+                xmlDoc->Save(fileName);
 
-            DrawBitmap(IDB_BITMAP3, hDeviceContext, point.x, point.y);
+                status = 0;
+            }
         }
     }
-}
 
-void AppFunctions::InitializeXmlDocument() {
-    XmlDocument^ doc = gcnew XmlDocument();
-    doc->LoadXml("<root></root>");
-    doc->Save("dataCache.xml");
-}
+    return status;
+};
 
 void AppFunctions::StorePoint(POINT point) {
     // Load data cache file and write point coordinates to it.
     XmlDocument^ xmlDoc = gcnew XmlDocument();
-    xmlDoc->Load("dataCache.xml");
+    String^ fileName = gcnew String(STORAGE);
+
+    xmlDoc->Load(fileName);
 
     XmlElement^ xmlPoint;
 
@@ -105,18 +122,88 @@ void AppFunctions::StorePoint(POINT point) {
 
     xmlDoc->DocumentElement->AppendChild(xmlPoint);
 
-    xmlDoc->Save("dataCache.xml");
+    xmlDoc->Save(fileName);
+}
+
+void AppFunctions::UpdatePoints(HDC hDeviceContext) {
+    // Load data storage file and draw all points to handle device 
+    // context which is referring to the canvas.
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    String^ fileName = gcnew String(STORAGE);
+
+    INT32 xValue, yValue;
+    POINT point;
+
+    int selectionState;
+
+    xmlDoc->Load(fileName);
+
+    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+
+    if (nodeList->Count) {
+        for (int i = 0; i < nodeList->Count; i++) {
+            XmlNode^ node = nodeList[i];
+
+            Int32::TryParse(node->Attributes[0]->Value, xValue);
+            Int32::TryParse(node->Attributes[1]->Value, yValue);
+            Int32::TryParse(node->Attributes[2]->Value, selectionState);
+
+            point = {
+                xValue,
+                yValue
+            };
+
+            switch (selectionState) {
+                case 0:
+                {
+                    DrawBitmap(IDB_BITMAP3, hDeviceContext, point.x, point.y);
+
+                    break;
+                }
+                case 1:
+                {
+                    DrawBitmap(IDB_BITMAP8, hDeviceContext, point.x, point.y);
+
+                    break;
+                }
+            }
+
+        }
+    }
+}
+
+void AppFunctions::ResetSelectionState() {
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    String^ fileName = gcnew String(STORAGE);
+
+    int status = 1;
+
+    // Load the XML document from the specified URL.
+    xmlDoc->Load(fileName);
+
+    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+
+    if (nodeList->Count) {
+        for (int i = 0; i < nodeList->Count; i++) {
+            XmlNode^ node = nodeList[i];
+            XmlElement^ element = (XmlElement^)node;
+
+            element->SetAttribute("selectionState", "0");
+            xmlDoc->Save(fileName);
+        }
+    }
 }
 
 XmlElement^ AppFunctions::SerializePoint(XmlDocument^ xmlDoc, POINT point) {
-    XmlElement^ xmlPoint = xmlDoc->CreateElement("point");
+    XmlElement^ element = xmlDoc->CreateElement("point");
 
     // New elements are "pushed" into the XML-Structure from above, 
     // respectively attributes are "pushed" from the left. Hence it is 
     // necessary to set the attribute that shall occure at the very 
     // left at first.
-    xmlPoint->SetAttribute("x", point.x.ToString());
-    xmlPoint->SetAttribute("y", point.y.ToString());
+    element->SetAttribute("x", point.x.ToString());
+    element->SetAttribute("y", point.y.ToString());
+    element->SetAttribute("selectionState", "0");
 
-    return xmlPoint;
+    return element;
 }

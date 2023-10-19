@@ -30,6 +30,8 @@ const int BUTTON_HEIGHT = 30;
 const int SYMBOL_BUTTON_HEIGHT = 20;
 const int SYMBOL_BUTTON_WIDTH = 20;
 
+const char STORAGE[] = "dataCache.xml";
+
 // Global variable
 enum class toolState {
 	empty,
