@@ -10,11 +10,13 @@ namespace AppFunctions
 
     void InitializeXmlDocument();
 
-    void ResetSelectionState();
+    void ResetSelection();
 
-    void StorePoint(POINT point);
+    void SelectPoint(int pointId);
 
-    void UpdatePoints(HDC hDeviceContext);
+    void AddPoint(POINT point);
+
+    void UpdatePoints(HDC hDeviceContext, int pointId = -1);
 
     XmlElement^ SerializePoint(XmlDocument^ xmlDoc, POINT point);
 };

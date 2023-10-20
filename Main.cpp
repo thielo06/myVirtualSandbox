@@ -456,14 +456,7 @@ LRESULT CALLBACK canvasWndProc(
             DeleteObject(hBrush);
 
             if (lParam != NULL) {
-                POINT point;
-
-                point = {
-                    GET_X_LPARAM(lParam),
-                    GET_Y_LPARAM(lParam)
-                };
-
-                AppFunctions::StorePoint(point);
+                AppFunctions::UpdatePoints(hDeviceContext, lParam);
             }
 
             AppFunctions::UpdatePoints(hDeviceContext);
@@ -492,8 +485,10 @@ LRESULT CALLBACK canvasWndProc(
                 }
                 case toolState::addPoint:
                 {
+                    AppFunctions::AddPoint(point);
+
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, NULL, lParam);
+                    SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
 
                     hOutputWnd = MyObjects.Output.hObjectWnd;
                     
@@ -547,9 +542,13 @@ LRESULT CALLBACK canvasWndProc(
                     // and then the selection state of all points will 
                     // be reset before the update is done with an 
                     // empty value for lParam.
-                    if (AppFunctions::SearchPointXmlDocument(point)) {
+                    int pointId = AppFunctions::SearchPointXmlDocument(point);
+
+                    if (pointId>=0) {
+                        AppFunctions::SelectPoint(pointId);
+
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
+                        SendMessage(hCanvasWnd, WM_PAINT, NULL, pointId);
 
                         hOutputWnd = MyObjects.Output.hObjectWnd;
 
@@ -592,7 +591,7 @@ LRESULT CALLBACK canvasWndProc(
 
                         SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
                     } else {
-                        AppFunctions::ResetSelectionState();
+                        AppFunctions::ResetSelection();
 
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
