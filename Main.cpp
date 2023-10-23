@@ -104,13 +104,13 @@ LRESULT CALLBACK wndProc(
             switch (controlIdentifier) {
                 case MyObjects.AddPointButtonId:
                 {
-                    currentToolState = toolState::addPoint;
+                    CurrentToolState = ToolState::addPoint;
 
                     break;
                 }
                 case MyObjects.SelectPointButtonId:
                 {
-                    currentToolState = toolState::selectPoint;
+                    CurrentToolState = ToolState::selectPoint;
 
                     break;
                 }
@@ -156,7 +156,7 @@ LRESULT CALLBACK wndProc(
 
             RegisterClass(&canvasWndClass);
 
-            AppFunctions::InitializeXmlDocument();
+            XmlStorage::XmlDocument = AppFunctions::InitializeXmlDocument();
 
             // The following loop iterates through the container of user 
             // interface objects.
@@ -421,7 +421,7 @@ LRESULT CALLBACK canvasWndProc(
     {
         case WM_CREATE:
         {
-            toolState currentToolState = toolState::empty;
+            ToolState currentToolState = ToolState::empty;
 
             System::Diagnostics::Debug::WriteLine("Load bitmap.");
 
@@ -477,13 +477,13 @@ LRESULT CALLBACK canvasWndProc(
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
 
-            switch (currentToolState) 
+            switch (CurrentToolState) 
             {
-                case toolState::empty:
+                case ToolState::empty:
                 {
                     break;
                 }
-                case toolState::addPoint:
+                case ToolState::addPoint:
                 {
                     AppFunctions::AddPoint(point);
 
@@ -533,7 +533,7 @@ LRESULT CALLBACK canvasWndProc(
 
                     break;
                 }
-                case toolState::selectPoint:
+                case ToolState::selectPoint:
                 {
                     // If SearchPointXmlDocument is successfull it 
                     // does return a non-zero value and the canvas 

@@ -8,8 +8,6 @@ namespace AppFunctions
 
     int SearchPointXmlDocument(POINT point);
 
-    void InitializeXmlDocument();
-
     void ResetSelection();
 
     void SelectPoint(int pointId);
@@ -18,5 +16,7 @@ namespace AppFunctions
 
     void UpdatePoints(HDC hDeviceContext, int pointId = -1);
 
-    XmlElement^ SerializePoint(XmlDocument^ xmlDoc, POINT point);
+    XmlDocument^ InitializeXmlDocument();
+
+    XmlElement^ SerializePoint(POINT point);
 };

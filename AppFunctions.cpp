@@ -65,14 +65,11 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
 
 // Returns pointId if point is found in XML Document, -1 if not.
 int AppFunctions::SearchPointXmlDocument(POINT point) {
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
-    String^ fileName = gcnew String(STORAGE);
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
+    String^ fileName = XmlStorage::FileName;
 
     // Assign -1 as a default to the return value.
     int pointId = -1;
-
-    // Load the XML document from the specified URL.
-    xmlDoc->Load(fileName);
 
     XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
 
@@ -97,42 +94,12 @@ int AppFunctions::SearchPointXmlDocument(POINT point) {
     return pointId;
 };
 
-void AppFunctions::InitializeXmlDocument() {
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
-    XmlDocumentType^ xmlDoctype;
-
-    String^ fileName = gcnew String(STORAGE);
-
-    xmlDoctype = xmlDoc->CreateDocumentType(
-        // Name of the document type
-        "root",
-        nullptr, nullptr,
-        // DTD internal subset of the document type
-        "<!ELEMENT root (point)*>"
-        "<!ELEMENT point EMPTY>"
-        "<!ATTLIST point"
-        " id ID #REQUIRED"
-        " selectionstate CDATA #REQUIRED"
-        " y CDATA #REQUIRED"
-        " x CDATA #REQUIRED"
-        ">"
-    );
-    xmlDoc->AppendChild(xmlDoctype);
-
-    xmlDoc->AppendChild(xmlDoc->CreateElement("root"));
-    xmlDoc->Save(fileName);
-}
-
 void AppFunctions::ResetSelection() {
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
-    String^ fileName = gcnew String(STORAGE);
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
+    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+    String^ fileName = XmlStorage::FileName;
 
     int status = 1;
-
-    // Load the XML document from the specified URL.
-    xmlDoc->Load(fileName);
-
-    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
 
     if (nodeList->Count) {
         for (int i = 0; i < nodeList->Count; i++) {
@@ -147,42 +114,34 @@ void AppFunctions::ResetSelection() {
 }
 
 void AppFunctions::SelectPoint(int pointId) {
-    // Load data cache file and write point to it.
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
     XmlElement^ xmlElement;
-    String^ fileName = gcnew String(STORAGE);
+    String^ fileName = XmlStorage::FileName;
 
-    xmlDoc->Load(fileName);
     xmlElement = xmlDoc->GetElementById(pointId.ToString());
     xmlElement->SetAttribute("selectionState", "1");
     xmlDoc->Save(fileName);
 };
 
 void AppFunctions::AddPoint(POINT point) {
-    // Load data cache file and write point to it.
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
-    XmlElement^ xmlPoint;
-    String^ fileName = gcnew String(STORAGE);
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
+    XmlElement^ xmlElement;
+    String^ fileName = XmlStorage::FileName;
 
-    xmlDoc->Load(fileName);
+    xmlElement = AppFunctions::SerializePoint(point);
 
-    xmlPoint = AppFunctions::SerializePoint(xmlDoc, point);
-
-    xmlDoc->DocumentElement->AppendChild(xmlPoint);
+    xmlDoc->DocumentElement->AppendChild(xmlElement);
     xmlDoc->Save(fileName);
 }
 
 void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
     // Load data storage file and draw all points to handle device 
     // context which is referring to the canvas.
-    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
     XmlNode^ node;
-
-    String^ fileName = gcnew String(STORAGE);
+    String^ fileName = XmlStorage::FileName;
 
     INT32 xValue, yValue, selectionState;
-
-    xmlDoc->Load(fileName);
 
     if (pointId>=0) {
         node = xmlDoc->GetElementById(pointId.ToString());
@@ -235,7 +194,36 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
     }
 }
 
-XmlElement^ AppFunctions::SerializePoint(XmlDocument^ xmlDoc, POINT point) {
+XmlDocument^ AppFunctions::InitializeXmlDocument() {
+    XmlDocument^ xmlDoc = gcnew XmlDocument();
+    XmlDocumentType^ xmlDoctype;
+
+    String^ fileName = XmlStorage::FileName;
+
+    xmlDoctype = xmlDoc->CreateDocumentType(
+        // Name of the document type
+        "root",
+        nullptr, nullptr,
+        // DTD internal subset of the document type
+        "<!ELEMENT root (point)*>"
+        "<!ELEMENT point EMPTY>"
+        "<!ATTLIST point"
+        " id ID #REQUIRED"
+        " selectionstate CDATA #REQUIRED"
+        " y CDATA #REQUIRED"
+        " x CDATA #REQUIRED"
+        ">"
+    );
+    xmlDoc->AppendChild(xmlDoctype);
+
+    xmlDoc->AppendChild(xmlDoc->CreateElement("root"));
+    xmlDoc->Save(fileName);
+
+    return xmlDoc;
+}
+
+XmlElement^ AppFunctions::SerializePoint(POINT point) {
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
     XmlElement^ element = xmlDoc->CreateElement("point");
     XmlNodeList^ nodeList;
 

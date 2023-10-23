@@ -33,10 +33,16 @@ const int SYMBOL_BUTTON_WIDTH = 20;
 const char STORAGE[] = "dataCache.xml";
 
 // Global variable
-enum class toolState {
+enum class ToolState {
 	empty,
 	addPoint,
 	selectPoint
 };
 
-extern toolState currentToolState;
+extern ToolState CurrentToolState;
+
+ref class XmlStorage {
+public:
+	static XmlDocument^ XmlDocument;
+	static String^ FileName = gcnew String(STORAGE);
+};
