@@ -423,8 +423,6 @@ LRESULT CALLBACK canvasWndProc(
         {
             ToolState currentToolState = ToolState::empty;
 
-            System::Diagnostics::Debug::WriteLine("Load bitmap.");
-
             break;
         }
 
@@ -446,20 +444,16 @@ LRESULT CALLBACK canvasWndProc(
 
             hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
 
-            // Paint application background.
+            // Paint canvas background
             FillRect(
                 hDeviceContext,
                 &paintStruct.rcPaint,
                 hBrush
             );
 
+            AppFunctions::UpdatePoints(hDeviceContext, -1);
+
             DeleteObject(hBrush);
-
-            if (lParam != NULL) {
-                AppFunctions::UpdatePoints(hDeviceContext, lParam);
-            }
-
-            AppFunctions::UpdatePoints(hDeviceContext);
 
             EndPaint(hCanvasWnd, &paintStruct);
 
@@ -469,13 +463,13 @@ LRESULT CALLBACK canvasWndProc(
         case WM_LBUTTONDOWN:
         {
             HWND hOutputWnd;
+            INT32 xValue, yValue;
             LPWSTR textOutput, wndTextBuffer;
-            POINT point = {};
 
-            int wndTextLength, textLength;
+            int textLength, wndTextLength;
 
-            point.x = GET_X_LPARAM(lParam);
-            point.y = GET_Y_LPARAM(lParam);
+            xValue = GET_X_LPARAM(lParam);
+            yValue = GET_Y_LPARAM(lParam);
 
             switch (CurrentToolState) 
             {
@@ -485,7 +479,13 @@ LRESULT CALLBACK canvasWndProc(
                 }
                 case ToolState::addPoint:
                 {
-                    AppFunctions::AddPoint(point);
+                    POINT pointToAdd = {
+                        xValue,
+                        yValue
+                    };
+
+                    AppFunctions::AddPoint(pointToAdd);
+                    int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
                     SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
@@ -501,7 +501,7 @@ LRESULT CALLBACK canvasWndProc(
 
                     wchar_t tempTextBuffer[256];
 
-                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", point.x, point.y);
+                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", pointToAdd.x, pointToAdd.y);
 
                     // If the length of the window text is bigger than 
                     // one, the window text is not empty and it is 
@@ -542,13 +542,13 @@ LRESULT CALLBACK canvasWndProc(
                     // and then the selection state of all points will 
                     // be reset before the update is done with an 
                     // empty value for lParam.
-                    int pointId = AppFunctions::SearchPointXmlDocument(point);
+                    int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
                     if (pointId>=0) {
-                        AppFunctions::SelectPoint(pointId);
+                        POINT pointToSelect = AppFunctions::SelectPoint(pointId);
 
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, NULL, pointId);
+                        SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
 
                         hOutputWnd = MyObjects.Output.hObjectWnd;
 
@@ -561,7 +561,7 @@ LRESULT CALLBACK canvasWndProc(
 
                         wchar_t tempTextBuffer[256];
 
-                        wsprintfW(tempTextBuffer, L"Select Point %i, %i", point.x, point.y);
+                        wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
 
                         // If the length of the window text is bigger than 
                         // one, the window text is not empty and it is 

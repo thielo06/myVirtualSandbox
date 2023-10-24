@@ -28,6 +28,8 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
     // object that is being replaced.
     hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
 
+    DeleteObject(hBitmap);
+
     // Read graphical information from the handle 
     // and write it to the buffer at specified 
     // location.
@@ -64,9 +66,8 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
 }
 
 // Returns pointId if point is found in XML Document, -1 if not.
-int AppFunctions::SearchPointXmlDocument(POINT point) {
+int AppFunctions::SearchPointXmlDocument(INT32 xValue, INT32 yValue) {
     XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    String^ fileName = XmlStorage::FileName;
 
     // Assign -1 as a default to the return value.
     int pointId = -1;
@@ -78,13 +79,13 @@ int AppFunctions::SearchPointXmlDocument(POINT point) {
             XmlNode^ node = nodeList[i];
             XmlElement^ element = (XmlElement^)node;
 
-            INT32 xValue, yValue;
+            INT32 xCompare, yCompare;
 
-            Int32::TryParse(node->Attributes[1]->Value, xValue);
-            Int32::TryParse(node->Attributes[2]->Value, yValue);
+            Int32::TryParse(node->Attributes[1]->Value, xCompare);
+            Int32::TryParse(node->Attributes[2]->Value, yCompare);
 
-            if (point.x >= xValue - 1 && point.x <= xValue + 1) {
-                if (point.y >= yValue - 1 && point.y <= yValue + 1) {
+            if (xValue >= xCompare - 1 && xValue <= xCompare + 1) {
+                if (yValue >= yCompare - 1 && yValue <= yCompare + 1) {
                     Int32::TryParse(node->Attributes[0]->Value, pointId);
                 }
             }
@@ -113,67 +114,55 @@ void AppFunctions::ResetSelection() {
     }
 }
 
-void AppFunctions::SelectPoint(int pointId) {
-    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    XmlElement^ xmlElement;
-    String^ fileName = XmlStorage::FileName;
-
-    xmlElement = xmlDoc->GetElementById(pointId.ToString());
-    xmlElement->SetAttribute("selectionState", "1");
-    xmlDoc->Save(fileName);
-};
-
 void AppFunctions::AddPoint(POINT point) {
     XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
     XmlElement^ xmlElement;
-    String^ fileName = XmlStorage::FileName;
 
     xmlElement = AppFunctions::SerializePoint(point);
 
     xmlDoc->DocumentElement->AppendChild(xmlElement);
-    xmlDoc->Save(fileName);
+    xmlDoc->Save(XmlStorage::FileName);
 }
 
 void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
     // Load data storage file and draw all points to handle device 
     // context which is referring to the canvas.
     XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    XmlNode^ node;
-    String^ fileName = XmlStorage::FileName;
+    XmlElement^ xmlElement;
 
     INT32 xValue, yValue, selectionState;
 
-    if (pointId>=0) {
-        node = xmlDoc->GetElementById(pointId.ToString());
+    if (pointId!=-1) {
+        xmlElement = xmlDoc->GetElementById(pointId.ToString());
 
-        Int32::TryParse(node->Attributes[1]->Value, xValue);
-        Int32::TryParse(node->Attributes[2]->Value, yValue);
-        Int32::TryParse(node->Attributes[3]->Value, selectionState);
+        Int32::TryParse(xmlElement->Attributes[1]->Value, xValue);
+        Int32::TryParse(xmlElement->Attributes[2]->Value, yValue);
+        Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
         switch (selectionState) {
-            case 0:
-            {
-                DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
+        case 0:
+        {
+            DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
 
-                break;
-            }
-            case 1:
-            {
-                DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
+            break;
+        }
+        case 1:
+        {
+            DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
 
-                break;
-            }
+            break;
+        }
         }
     } else {
         XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
 
         if (nodeList->Count) {
             for (int i = 0; i < nodeList->Count; i++) {
-                node = nodeList[i];
+                xmlElement = (XmlElement^)nodeList[i];
 
-                Int32::TryParse(node->Attributes[1]->Value, xValue);
-                Int32::TryParse(node->Attributes[2]->Value, yValue);
-                Int32::TryParse(node->Attributes[3]->Value, selectionState);
+                Int32::TryParse(xmlElement->Attributes[1]->Value, xValue);
+                Int32::TryParse(xmlElement->Attributes[2]->Value, yValue);
+                Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
                 switch (selectionState) {
                     case 0:
@@ -194,11 +183,31 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
     }
 }
 
+POINT AppFunctions::SelectPoint(int& pointId) {
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
+    XmlElement^ xmlElement;
+
+    INT32 xValue, yValue;
+    POINT point;
+
+    xmlElement = xmlDoc->GetElementById(pointId.ToString());
+    xmlElement->SetAttribute("selectionState", "1");
+    xmlDoc->Save(XmlStorage::FileName);
+
+    Int32::TryParse(xmlElement->Attributes[1]->Value, xValue);
+    Int32::TryParse(xmlElement->Attributes[2]->Value, yValue);
+
+    point = {
+        (LONG)xValue,
+        (LONG)yValue
+    };
+
+    return point;
+};
+
 XmlDocument^ AppFunctions::InitializeXmlDocument() {
     XmlDocument^ xmlDoc = gcnew XmlDocument();
     XmlDocumentType^ xmlDoctype;
-
-    String^ fileName = XmlStorage::FileName;
 
     xmlDoctype = xmlDoc->CreateDocumentType(
         // Name of the document type
@@ -217,7 +226,7 @@ XmlDocument^ AppFunctions::InitializeXmlDocument() {
     xmlDoc->AppendChild(xmlDoctype);
 
     xmlDoc->AppendChild(xmlDoc->CreateElement("root"));
-    xmlDoc->Save(fileName);
+    xmlDoc->Save(XmlStorage::FileName);
 
     return xmlDoc;
 }

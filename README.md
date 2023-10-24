@@ -17,3 +17,33 @@ The includes must follow a specific order
 - STL
 - External third-party libraries
 - Custom 
+
+### Notes
+## Passing arguments to functions
+There are different ways of how you can pass a parameter to a function:
+1. Pass a copy
+
+2. Pass a reference
+Useful when you need to change the value arguments.
+```
+int main() {
+    int num = 10;
+    int* pNum = &num;
+
+    funcOne(num);
+    funcTwo(num);
+}
+
+// Pass a copy
+void funcOne(int x) {
+    // pTest is not equal to pNum
+    int* pTest = &x;
+}
+
+// Pass a reference
+void funcTwo(int &x) {
+    // pTest is equal to pNum
+    int* pTest = &x;
+}
+```
+ 

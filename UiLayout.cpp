@@ -114,6 +114,4 @@ UiObjects::UiObjects() {
         MyColors.ElevatedColorDarkTheme
     };
     Objects.push_back(&ResetOutputButton);
-
-
 }

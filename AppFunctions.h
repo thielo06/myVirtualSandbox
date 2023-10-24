@@ -6,15 +6,15 @@ namespace AppFunctions
 {
     int DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin);
 
-    int SearchPointXmlDocument(POINT point);
+    int SearchPointXmlDocument(INT32 xValue, INT32 yValue);
 
     void ResetSelection();
 
-    void SelectPoint(int pointId);
-
     void AddPoint(POINT point);
 
-    void UpdatePoints(HDC hDeviceContext, int pointId = -1);
+    void UpdatePoints(HDC hDeviceContext, int pointId=-1);
+
+    POINT SelectPoint(int& pointId);
 
     XmlDocument^ InitializeXmlDocument();
 

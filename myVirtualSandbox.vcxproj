@@ -124,6 +124,7 @@
       <PreprocessToFile>false</PreprocessToFile>
       <ScanSourceForModuleDependencies>
       </ScanSourceForModuleDependencies>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
