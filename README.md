@@ -6,6 +6,10 @@ It´s written in C++.
 I´ve been told that it´s a bad idea to try to learn such a complicated language not following a well-structered textbook but I´ll try it anyways. Thanks for the advice.
 
 ### Preconditions
+Set up Visual Studio Installer
+- Desktopentwicklung mit C++ / Desktop development with C++
+- .NET-Desktopentwicklung / .NET desktop development
+
 Set up Visual Studio Configuration Properties
 - C/C++ > General > Common Language RunTime Support > Common Language RunTime Support
 - Linker > System > Subsystem > Windows
@@ -24,7 +28,9 @@ There are different ways of how you can pass a parameter to a function:
 1. Pass a copy
 
 2. Pass a reference
+
 Useful when you need to change the value arguments.
+
 ```
 int main() {
     int num = 10;

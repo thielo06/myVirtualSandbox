@@ -1,24 +1,7 @@
 <!DOCTYPE root[<!ELEMENT root (point)*><!ELEMENT point EMPTY><!ATTLIST point id ID #REQUIRED selectionstate CDATA #REQUIRED y CDATA #REQUIRED x CDATA #REQUIRED>]>
 <root>
-  <point id="0" x="547" y="74" selectionState="0" />
-  <point id="1" x="574" y="236" selectionState="0" />
-  <point id="2" x="479" y="325" selectionState="0" />
-  <point id="3" x="321" y="276" selectionState="0" />
-  <point id="4" x="359" y="178" selectionState="0" />
-  <point id="5" x="443" y="171" selectionState="0" />
-  <point id="6" x="444" y="257" selectionState="0" />
-  <point id="7" x="377" y="330" selectionState="0" />
-  <point id="8" x="295" y="348" selectionState="0" />
-  <point id="9" x="223" y="388" selectionState="0" />
-  <point id="10" x="21" y="344" selectionState="0" />
-  <point id="11" x="38" y="240" selectionState="0" />
-  <point id="12" x="117" y="176" selectionState="0" />
-  <point id="13" x="145" y="191" selectionState="0" />
-  <point id="14" x="111" y="332" selectionState="0" />
-  <point id="15" x="124" y="377" selectionState="0" />
-  <point id="16" x="194" y="427" selectionState="0" />
-  <point id="17" x="331" y="421" selectionState="0" />
-  <point id="18" x="364" y="319" selectionState="0" />
-  <point id="19" x="340" y="204" selectionState="0" />
-  <point id="20" x="510" y="137" selectionState="0" />
+  <point id="0" x="432" y="78" selectionState="1" />
+  <point id="1" x="478" y="167" selectionState="1" />
+  <point id="2" x="357" y="256" selectionState="0" />
+  <point id="3" x="350" y="172" selectionState="0" />
 </root>

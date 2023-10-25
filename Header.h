@@ -7,6 +7,8 @@
 
 #include "Resource.h"
 
+// Following DLL are part of the .NET desktop development workload 
+// which is a framework that is not native to C++.
 #using <System.dll>
 #using <System.Xml.dll>
 
