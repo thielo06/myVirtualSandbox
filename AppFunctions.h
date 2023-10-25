@@ -14,7 +14,7 @@ namespace AppFunctions
 
     void UpdatePoints(HDC hDeviceContext, int pointId=-1);
 
-    POINT SelectPoint(int& pointId);
+    POINT UpdateSelectionState(int pointId, int selectionState);
 
     XmlDocument^ InitializeXmlDocument();
 

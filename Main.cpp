@@ -444,14 +444,19 @@ LRESULT CALLBACK canvasWndProc(
 
             hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
 
-            // Paint canvas background
-            FillRect(
-                hDeviceContext,
-                &paintStruct.rcPaint,
-                hBrush
-            );
+            if (wParam == WM_LBUTTONDOWN || wParam == WM_MOUSEHOVER) {
+                // Update a single object.
+                AppFunctions::UpdatePoints(hDeviceContext, lParam);
+            } else {
+                // Update all objects.
+                FillRect(
+                    hDeviceContext,
+                    &paintStruct.rcPaint,
+                    hBrush
+                );
 
-            AppFunctions::UpdatePoints(hDeviceContext, -1);
+                AppFunctions::UpdatePoints(hDeviceContext, -1);
+            }
 
             DeleteObject(hBrush);
 
@@ -488,7 +493,7 @@ LRESULT CALLBACK canvasWndProc(
                     int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
+                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
                     hOutputWnd = MyObjects.Output.hObjectWnd;
                     
@@ -545,10 +550,10 @@ LRESULT CALLBACK canvasWndProc(
                     int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
                     if (pointId>=0) {
-                        POINT pointToSelect = AppFunctions::SelectPoint(pointId);
+                        POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
 
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, NULL, NULL);
+                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
                         hOutputWnd = MyObjects.Output.hObjectWnd;
 
@@ -606,6 +611,39 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_DESTROY:
         {
+
+            break;
+        }
+
+        case WM_MOUSEMOVE:
+        {
+            // Initialize a mouse tracking event every time the mouse 
+            // moves. The tracking event stops when the window which 
+            // handle is specified registers a "WM_MOUSEHOVER"-Message.
+            TRACKMOUSEEVENT trackMouseEvent = {
+                sizeof(TRACKMOUSEEVENT),
+                TME_HOVER,
+                hCanvasWnd,
+                HOVER_DEFAULT
+            };
+
+            TrackMouseEvent(&trackMouseEvent);
+
+            break;
+        }
+
+        case WM_MOUSEHOVER:
+        {
+            INT32 xValue, yValue;
+
+            xValue = GET_X_LPARAM(lParam);
+            yValue = GET_Y_LPARAM(lParam);
+
+            int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
+
+            if (pointId != -1) {
+                Diagnostics::Debug::WriteLine("Hovering...");
+            };
 
             break;
         }

@@ -170,6 +170,7 @@
     <Image Include="Resources\AddPointButton.bmp" />
     <Image Include="Resources\AddPointButtonSelected.bmp" />
     <Image Include="Resources\Point.bmp" />
+    <Image Include="Resources\PointHovering.bmp" />
     <Image Include="Resources\PointSelected.bmp" />
     <Image Include="Resources\ResetOutputBitmap.bmp" />
     <Image Include="Resources\ResetOutputBitmapSelected.bmp" />

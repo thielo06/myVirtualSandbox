@@ -34,13 +34,13 @@ const int SYMBOL_BUTTON_WIDTH = 20;
 
 const char STORAGE[] = "dataCache.xml";
 
-// Global variable
 enum class ToolState {
 	empty,
 	addPoint,
 	selectPoint
 };
 
+// Global variable
 extern ToolState CurrentToolState;
 
 ref class XmlStorage {

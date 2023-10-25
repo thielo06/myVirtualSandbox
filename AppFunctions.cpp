@@ -1,6 +1,11 @@
 #include "AppFunctions.h"
 #include "Header.h"
 
+// Initially define tool state as empty.
+ToolState CurrentToolState = ToolState::empty;
+
+int mouseHover = -1;
+
 int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin = L"c") {
     BITMAP bitmap;
     HBITMAP hBitmap;
@@ -140,18 +145,24 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
         Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
         switch (selectionState) {
-        case 0:
-        {
-            DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
+            case 0: // not selected
+            {
+                DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
 
-            break;
-        }
-        case 1:
-        {
-            DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
+                break;
+            }
+            case 1: // hovering
+            {
+                DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
 
-            break;
-        }
+                break;
+            }
+            case 2: // selected
+            {
+                DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
+
+                break;
+            }
         }
     } else {
         XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
@@ -165,13 +176,19 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
                 Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
                 switch (selectionState) {
-                    case 0:
+                    case 0: // not selected
                     {
                         DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
 
                         break;
                     }
-                    case 1:
+                    case 1: // hovering
+                    {
+                        DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
+
+                        break;
+                    }
+                    case 2: // selected
                     {
                         DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
 
@@ -183,7 +200,7 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
     }
 }
 
-POINT AppFunctions::SelectPoint(int& pointId) {
+POINT AppFunctions::UpdateSelectionState(int pointId, int selectionState) {
     XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
     XmlElement^ xmlElement;
 
@@ -191,7 +208,7 @@ POINT AppFunctions::SelectPoint(int& pointId) {
     POINT point;
 
     xmlElement = xmlDoc->GetElementById(pointId.ToString());
-    xmlElement->SetAttribute("selectionState", "1");
+    xmlElement->SetAttribute("selectionState", selectionState.ToString());
     xmlDoc->Save(XmlStorage::FileName);
 
     Int32::TryParse(xmlElement->Attributes[1]->Value, xValue);

@@ -1,9 +1,6 @@
 #include "Header.h"
 #include "UiLayout.h"
 
-// Initially define tool state as empty.
-ToolState CurrentToolState = ToolState::empty;
-
 ColorPalette::ColorPalette() {
     TextColorDarkTheme = RGB(248, 248, 248);
 
