@@ -617,17 +617,19 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_MOUSEMOVE:
         {
-            // Initialize a mouse tracking event every time the mouse 
-            // moves. The tracking event stops when the window which 
-            // handle is specified registers a "WM_MOUSEHOVER"-Message.
-            TRACKMOUSEEVENT trackMouseEvent = {
-                sizeof(TRACKMOUSEEVENT),
-                TME_HOVER,
-                hCanvasWnd,
-                HOVER_DEFAULT
-            };
+            if (CurrentToolState == ToolState::selectPoint) {
+                // Initialize a mouse tracking event every time the mouse 
+                // moves. The tracking event stops when the window which 
+                // handle is specified registers a "WM_MOUSEHOVER"-Message.
+                TRACKMOUSEEVENT trackMouseEvent = {
+                    sizeof(TRACKMOUSEEVENT),
+                    TME_HOVER,
+                    hCanvasWnd,
+                    25
+                };
 
-            TrackMouseEvent(&trackMouseEvent);
+                TrackMouseEvent(&trackMouseEvent);
+            }
 
             break;
         }
@@ -642,8 +644,31 @@ LRESULT CALLBACK canvasWndProc(
             int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
             if (pointId != -1) {
-                Diagnostics::Debug::WriteLine("Hovering...");
-            };
+                int selectionState = AppFunctions::GetSelectionState(pointId);
+
+                if (selectionState != 2) {
+                    AppFunctions::UpdateSelectionState(pointId, 1);
+
+                    prevPointId = pointId;
+                    prevPointFlag = true;
+
+                    InvalidateRect(hCanvasWnd, NULL, FALSE);
+                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                }
+            } else {
+                if (prevPointFlag) {
+                    int selectionState = AppFunctions::GetSelectionState(prevPointId);
+
+                    if (selectionState != 2) {
+                        AppFunctions::UpdateSelectionState(prevPointId, 0);
+
+                        InvalidateRect(hCanvasWnd, NULL, FALSE);
+                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                    }
+
+                    prevPointFlag = false;
+                }
+            }
 
             break;
         }

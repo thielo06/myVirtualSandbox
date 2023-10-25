@@ -13,6 +13,8 @@ ColorPalette::ColorPalette() {
     RedAccentDarkTheme = RGB(202, 62, 71);
 
     BlueAccentDarkTheme = RGB(12, 85, 190);
+
+    YellowAccentDarkTheme = RGB(255, 201, 14);
 }
 
 // Initialization of the user interface objects that are declared in 

@@ -1,10 +1,10 @@
 #include "AppFunctions.h"
 #include "Header.h"
 
-// Initially define tool state as empty.
+// Initialize global variables.
 ToolState CurrentToolState = ToolState::empty;
-
-int mouseHover = -1;
+bool prevPointFlag = false;
+int prevPointId = -1;
 
 int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin = L"c") {
     BITMAP bitmap;
@@ -89,8 +89,8 @@ int AppFunctions::SearchPointXmlDocument(INT32 xValue, INT32 yValue) {
             Int32::TryParse(node->Attributes[1]->Value, xCompare);
             Int32::TryParse(node->Attributes[2]->Value, yCompare);
 
-            if (xValue >= xCompare - 1 && xValue <= xCompare + 1) {
-                if (yValue >= yCompare - 1 && yValue <= yCompare + 1) {
+            if (xValue >= xCompare - 2 && xValue <= xCompare + 2) {
+                if (yValue >= yCompare - 2 && yValue <= yCompare + 2) {
                     Int32::TryParse(node->Attributes[0]->Value, pointId);
                 }
             }
@@ -198,6 +198,19 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
             }
         }
     }
+}
+
+int AppFunctions::GetSelectionState(int pointId) {
+    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
+    XmlElement^ xmlElement;
+
+    int selectionState;
+
+    xmlElement = xmlDoc->GetElementById(pointId.ToString());
+
+    Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
+
+    return selectionState;
 }
 
 POINT AppFunctions::UpdateSelectionState(int pointId, int selectionState) {

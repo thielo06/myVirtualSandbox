@@ -10,7 +10,13 @@
 static class ColorPalette
 {
 public:
-    COLORREF TextColorDarkTheme, BackgroundColorDarkTheme, ElevatedColorDarkTheme, FrameColorDarkTheme, RedAccentDarkTheme, BlueAccentDarkTheme;
+    COLORREF TextColorDarkTheme,
+        BackgroundColorDarkTheme,
+        ElevatedColorDarkTheme,
+        FrameColorDarkTheme,
+        RedAccentDarkTheme,
+        BlueAccentDarkTheme,
+        YellowAccentDarkTheme;
 
     ColorPalette();
 } MyColors;

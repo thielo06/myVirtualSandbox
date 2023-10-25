@@ -6,6 +6,8 @@ namespace AppFunctions
 {
     int DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin);
 
+    int GetSelectionState(int pointId);
+
     int SearchPointXmlDocument(INT32 xValue, INT32 yValue);
 
     void ResetSelection();

@@ -48,3 +48,6 @@ public:
 	static XmlDocument^ XmlDocument;
 	static String^ FileName = gcnew String(STORAGE);
 };
+
+extern bool prevPointFlag;
+extern int prevPointId;
