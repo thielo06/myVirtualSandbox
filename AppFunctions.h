@@ -8,7 +8,7 @@ namespace AppFunctions
 
     int GetSelectionState(int pointId);
 
-    int SearchPointXmlDocument(INT32 xValue, INT32 yValue);
+    int SearchPoint(INT32 xValue, INT32 yValue);
 
     void ResetSelection();
 
@@ -21,4 +21,6 @@ namespace AppFunctions
     XmlDocument^ InitializeXmlDocument();
 
     XmlElement^ SerializePoint(POINT point);
+
+    void TextOutput(HWND hOutputWnd, LPWSTR tempTextBuffer);
 };

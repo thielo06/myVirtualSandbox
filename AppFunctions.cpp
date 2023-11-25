@@ -1,5 +1,4 @@
 #include "AppFunctions.h"
-#include "Header.h"
 
 // Initialize global variables.
 ToolState CurrentToolState = ToolState::empty;
@@ -71,13 +70,11 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
 }
 
 // Returns pointId if point is found in XML Document, -1 if not.
-int AppFunctions::SearchPointXmlDocument(INT32 xValue, INT32 yValue) {
-    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-
+int AppFunctions::SearchPoint(INT32 xValue, INT32 yValue) {
     // Assign -1 as a default to the return value.
     int pointId = -1;
 
-    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+    XmlNodeList^ nodeList = XmlStorage::XmlDocument->GetElementsByTagName("point");
 
     if (nodeList->Count) {
         for (int i = 0; i < nodeList->Count; i++) {
@@ -98,11 +95,10 @@ int AppFunctions::SearchPointXmlDocument(INT32 xValue, INT32 yValue) {
     }
 
     return pointId;
-};
+}
 
 void AppFunctions::ResetSelection() {
-    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
+    XmlNodeList^ nodeList = XmlStorage::XmlDocument->GetElementsByTagName("point");
     String^ fileName = XmlStorage::FileName;
 
     int status = 1;
@@ -113,20 +109,19 @@ void AppFunctions::ResetSelection() {
             XmlElement^ element = (XmlElement^)node;
 
             element->SetAttribute("selectionState", "0");
-
-            xmlDoc->Save(fileName);
         }
     }
+
+    XmlStorage::XmlDocument->Save(fileName);
 }
 
+// Serialize an XML-Element from a POINT-Structure and append it as a child to 
+// global XML-Document.
 void AppFunctions::AddPoint(POINT point) {
-    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    XmlElement^ xmlElement;
+    XmlElement^ xmlElement = AppFunctions::SerializePoint(point);
 
-    xmlElement = AppFunctions::SerializePoint(point);
-
-    xmlDoc->DocumentElement->AppendChild(xmlElement);
-    xmlDoc->Save(XmlStorage::FileName);
+    XmlStorage::XmlDocument->DocumentElement->AppendChild(xmlElement);
+    XmlStorage::XmlDocument->Save(XmlStorage::FileName);
 }
 
 void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
@@ -137,7 +132,7 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
 
     INT32 xValue, yValue, selectionState;
 
-    if (pointId!=-1) {
+    if (pointId != -1) {
         xmlElement = xmlDoc->GetElementById(pointId.ToString());
 
         Int32::TryParse(xmlElement->Attributes[1]->Value, xValue);
@@ -145,26 +140,27 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
         Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
         switch (selectionState) {
-            case 0: // not selected
-            {
-                DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
+        case 0: // not selected
+        {
+            DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
 
-                break;
-            }
-            case 1: // hovering
-            {
-                DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
-
-                break;
-            }
-            case 2: // selected
-            {
-                DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
-
-                break;
-            }
+            break;
         }
-    } else {
+        case 1: // hovering
+        {
+            DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
+
+            break;
+        }
+        case 2: // selected
+        {
+            DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
+
+            break;
+        }
+        }
+    }
+    else {
         XmlNodeList^ nodeList = xmlDoc->GetElementsByTagName("point");
 
         if (nodeList->Count) {
@@ -176,24 +172,24 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int pointId) {
                 Int32::TryParse(xmlElement->Attributes[3]->Value, selectionState);
 
                 switch (selectionState) {
-                    case 0: // not selected
-                    {
-                        DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
+                case 0: // not selected
+                {
+                    DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
 
-                        break;
-                    }
-                    case 1: // hovering
-                    {
-                        DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
+                    break;
+                }
+                case 1: // hovering
+                {
+                    DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
 
-                        break;
-                    }
-                    case 2: // selected
-                    {
-                        DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
+                    break;
+                }
+                case 2: // selected
+                {
+                    DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
 
-                        break;
-                    }
+                    break;
+                }
                 }
             }
         }
@@ -233,7 +229,7 @@ POINT AppFunctions::UpdateSelectionState(int pointId, int selectionState) {
     };
 
     return point;
-};
+}
 
 XmlDocument^ AppFunctions::InitializeXmlDocument() {
     XmlDocument^ xmlDoc = gcnew XmlDocument();
@@ -261,23 +257,56 @@ XmlDocument^ AppFunctions::InitializeXmlDocument() {
     return xmlDoc;
 }
 
+// Create an XML-Element and assign various attributes to it.
 XmlElement^ AppFunctions::SerializePoint(POINT point) {
-    XmlDocument^ xmlDoc = XmlStorage::XmlDocument;
-    XmlElement^ element = xmlDoc->CreateElement("point");
-    XmlNodeList^ nodeList;
+    XmlElement^ element = XmlStorage::XmlDocument->CreateElement("point");
+    XmlNodeList^ nodeList = XmlStorage::XmlDocument->GetElementsByTagName("point");
 
-    nodeList = xmlDoc->GetElementsByTagName("point");
-
-    int idCount = nodeList->Count;
-
-    // New elements are "pushed" into the XML-Structure from above, 
-    // respectively attributes are "pushed" from the left. Hence it is 
-    // necessary to set the attribute that shall occure at the very 
-    // left at first.
-    element->SetAttribute("id", idCount.ToString());
+    element->SetAttribute("id", nodeList->Count.ToString());
     element->SetAttribute("x", point.x.ToString());
     element->SetAttribute("y", point.y.ToString());
     element->SetAttribute("selectionState", "0");
 
     return element;
+}
+
+void AppFunctions::TextOutput(HWND hOutputWnd, LPWSTR tempTextBuffer) {
+    LPWSTR textOutput, wndTextBuffer;
+
+    int textLength, wndTextLength;
+
+    // Create a buffer with length of the window text.
+    wndTextLength = GetWindowTextLength(hOutputWnd) + 1;
+    wndTextBuffer = new wchar_t[wndTextLength];
+
+    // Get the window text and write it to the buffer.
+    GetWindowText(hOutputWnd, wndTextBuffer, wndTextLength);
+
+    // If the length of the window text is bigger than 
+    // one, the window text is not empty and it is 
+    // concatenated with the value of the temporary text 
+    // buffer.
+    // If it is equal to one it means that it is empty, so 
+    // the text output is just the value of the tempory 
+    // text buffer.
+    if (wndTextLength > 1) {
+        // The length of the new text is the length of the 
+        // window text in addition to the tempory text 
+        // buffer.
+        // The array size is increased by three 
+        // characters, two for a linebreak "\r\n" and one 
+        // for the null terminator "\0".
+        textLength = wndTextLength + 2 + (int)wcslen(tempTextBuffer) + 1;
+        textOutput = new wchar_t[textLength];
+
+        wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
+    }
+    else {
+        textLength = (int)wcslen(tempTextBuffer) + 1;
+        textOutput = new wchar_t[textLength];
+
+        wsprintfW(textOutput, L"%s", tempTextBuffer);
+    }
+
+    SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
 }

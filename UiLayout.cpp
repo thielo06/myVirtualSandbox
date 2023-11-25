@@ -1,4 +1,3 @@
-#include "Header.h"
 #include "UiLayout.h"
 
 ColorPalette::ColorPalette() {

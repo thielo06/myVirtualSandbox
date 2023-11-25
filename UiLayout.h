@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include "Header.h"
+
 #include <vector>
 
 // Structure that defines a color palette. See 

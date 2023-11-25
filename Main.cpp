@@ -484,57 +484,27 @@ LRESULT CALLBACK canvasWndProc(
                 }
                 case ToolState::addPoint:
                 {
+                    int pointId = AppFunctions::SearchPoint(xValue, yValue);
+
+                    if (pointId != -1) {
+                        break;
+                    }
+
                     POINT pointToAdd = {
                         xValue,
                         yValue
                     };
 
                     AppFunctions::AddPoint(pointToAdd);
-                    int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
                     SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
-
-                    hOutputWnd = MyObjects.Output.hObjectWnd;
-                    
-                    // Create a buffer with length of the window text.
-                    wndTextLength = GetWindowTextLength(hOutputWnd) + 1;
-                    wndTextBuffer = new wchar_t[wndTextLength];
-
-                    // Get the window text and write it to the buffer.
-                    GetWindowText(hOutputWnd, wndTextBuffer, wndTextLength);
 
                     wchar_t tempTextBuffer[256];
 
                     wsprintfW(tempTextBuffer, L"Add Point %i, %i", pointToAdd.x, pointToAdd.y);
 
-                    // If the length of the window text is bigger than 
-                    // one, the window text is not empty and it is 
-                    // concatenated with the value of the temporary text 
-                    // buffer.
-                    // If it is equal to one it means that it is empty, so 
-                    // the text output is just the value of the tempory 
-                    // text buffer.
-                    if (wndTextLength > 1) {
-                        // The length of the new text is the length of the 
-                        // window text in addition to the tempory text 
-                        // buffer.
-                        // The array size is increased by three 
-                        // characters, two for a linebreak "\r\n" and one 
-                        // for the null terminator "\0".
-                        textLength = wndTextLength + 2 + (int)wcslen(tempTextBuffer) + 1;
-                        textOutput = new wchar_t[textLength];
-
-                        wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
-                    }
-                    else {
-                        textLength = (int)wcslen(tempTextBuffer) + 1;
-                        textOutput = new wchar_t[textLength];
-
-                        wsprintfW(textOutput, L"%s", tempTextBuffer);
-                    }
-
-                    SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
+                    AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
                     break;
                 }
@@ -547,7 +517,7 @@ LRESULT CALLBACK canvasWndProc(
                     // and then the selection state of all points will 
                     // be reset before the update is done with an 
                     // empty value for lParam.
-                    int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
+                    int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
                     if (pointId>=0) {
                         POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
@@ -555,46 +525,11 @@ LRESULT CALLBACK canvasWndProc(
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
-                        hOutputWnd = MyObjects.Output.hObjectWnd;
-
-                        // Create a buffer with length of the window text.
-                        wndTextLength = GetWindowTextLength(hOutputWnd) + 1;
-                        wndTextBuffer = new wchar_t[wndTextLength];
-
-                        // Get the window text and write it to the buffer.
-                        GetWindowText(hOutputWnd, wndTextBuffer, wndTextLength);
-
                         wchar_t tempTextBuffer[256];
 
                         wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
 
-                        // If the length of the window text is bigger than 
-                        // one, the window text is not empty and it is 
-                        // concatenated with the value of the temporary text 
-                        // buffer.
-                        // If it is equal to one it means that it is empty, so 
-                        // the text output is just the value of the tempory 
-                        // text buffer.
-                        if (wndTextLength > 1) {
-                            // The length of the new text is the length of the 
-                            // window text in addition to the tempory text 
-                            // buffer.
-                            // The array size is increased by three 
-                            // characters, two for a linebreak "\r\n" and one 
-                            // for the null terminator "\0".
-                            textLength = wndTextLength + 2 + (int)wcslen(tempTextBuffer) + 1;
-                            textOutput = new wchar_t[textLength];
-
-                            wsprintfW(textOutput, L"%s\r\n%s", wndTextBuffer, tempTextBuffer);
-                        }
-                        else {
-                            textLength = (int)wcslen(tempTextBuffer) + 1;
-                            textOutput = new wchar_t[textLength];
-
-                            wsprintfW(textOutput, L"%s", tempTextBuffer);
-                        }
-
-                        SendMessage(hOutputWnd, WM_SETTEXT, NULL, (LPARAM)textOutput);
+                        AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
                     } else {
                         AppFunctions::ResetSelection();
 
@@ -641,7 +576,7 @@ LRESULT CALLBACK canvasWndProc(
             xValue = GET_X_LPARAM(lParam);
             yValue = GET_Y_LPARAM(lParam);
 
-            int pointId = AppFunctions::SearchPointXmlDocument(xValue, yValue);
+            int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
             if (pointId != -1) {
                 int selectionState = AppFunctions::GetSelectionState(pointId);
