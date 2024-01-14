@@ -1,8 +1,7 @@
-#pragma once
+#ifndef UI_LAYOUT_H
+#define UI_LAYOUT_H
 
 #include "Header.h"
-
-#include <vector>
 
 // Structure that defines a color palette. See 
 // https://colorhunt.co/palette/525252414141313131ca3e47 and 
@@ -56,7 +55,9 @@ public:
 
     // Declare a vector class as a container of pointers to the 
     // "Object"-Elements.
-    std::vector<Object*> Objects;
+    vector<Object*> Objects;
 
     UiObjects();
 } MyObjects;
+
+#endif UI_LAYOUT_H

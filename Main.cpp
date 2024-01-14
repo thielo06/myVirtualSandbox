@@ -1,5 +1,4 @@
 #include "AppFunctions.h"
-#include "Header.h"
 #include "UiLayout.h"
 
 LRESULT CALLBACK wndProc(
@@ -116,7 +115,7 @@ LRESULT CALLBACK wndProc(
                 }
                 case MyObjects.CloseApplicationButtonId:
                 {
-                    System::Diagnostics::Debug::WriteLine("Close Window ...");
+                    Debug::WriteLine("Close Window ...");
 
                     SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 
@@ -155,8 +154,6 @@ LRESULT CALLBACK wndProc(
             canvasWndClass.lpszClassName = L"myVirtualSandbox Canvas Class";
 
             RegisterClass(&canvasWndClass);
-
-            XmlStorage::XmlDocument = AppFunctions::InitializeXmlDocument();
 
             // The following loop iterates through the container of user 
             // interface objects.
@@ -468,10 +465,9 @@ LRESULT CALLBACK canvasWndProc(
         case WM_LBUTTONDOWN:
         {
             HWND hOutputWnd;
-            INT32 xValue, yValue;
             LPWSTR textOutput, wndTextBuffer;
 
-            int textLength, wndTextLength;
+            int xValue, yValue, textLength, wndTextLength;
 
             xValue = GET_X_LPARAM(lParam);
             yValue = GET_Y_LPARAM(lParam);
@@ -490,19 +486,19 @@ LRESULT CALLBACK canvasWndProc(
                         break;
                     }
 
-                    POINT pointToAdd = {
+                    POINT point = {
                         xValue,
                         yValue
                     };
 
-                    AppFunctions::AddPoint(pointToAdd);
+                    AppFunctions::AddPoint(point);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
                     SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
-                    wchar_t tempTextBuffer[256];
+                    wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
 
-                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", pointToAdd.x, pointToAdd.y);
+                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", point.x, point.y);
 
                     AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
@@ -510,26 +506,34 @@ LRESULT CALLBACK canvasWndProc(
                 }
                 case ToolState::selectPoint:
                 {
-                    // If SearchPointXmlDocument is successfull it 
-                    // does return a non-zero value and the canvas 
-                    // area is updated with a null value for lParam.
-                    // If it fails it does not return a non-zero value 
-                    // and then the selection state of all points will 
-                    // be reset before the update is done with an 
-                    // empty value for lParam.
+                    // If SearchPoint is successfull it returns the 
+                    // value of the ID attribute of the points XML 
+                    // representative. That value is used to modify 
+                    // the corresponding selection state of that point 
+                    // before the canvas is updated. 
+                    // If it fails it returns -1 and the selection 
+                    // state of all points is reset before the canvas 
+                    // is updated.
                     int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
-                    if (pointId>=0) {
+                    if (pointId != -1) {
                         POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
 
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
-                        wchar_t tempTextBuffer[256];
+                        // The new operator allocates and initializes an 
+                        // array of wchar_t characters and returns a 
+                        // pointer to it.
+                        LPWSTR tempTextBuffer = new wchar_t[sizeof(L"Select Point %i, %i")];
 
                         wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
 
                         AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
+
+                        // Use the delete operator to deallocate the memory 
+                        // allocated by the new operator.
+                        delete[] tempTextBuffer;
                     } else {
                         AppFunctions::ResetSelection();
 

@@ -1,19 +1,22 @@
 #pragma once
 
 #include <dwmapi.h>
+#include <iostream>
 #include <string>
 #include <windows.h>
 #include <windowsx.h>
+#include <vector>
 
 #include "Resource.h"
 
 // Following DLL are part of the .NET desktop development workload 
 // which is a framework that is not native to C++.
 #using <System.dll>
-#using <System.Xml.dll>
 
 using namespace System;
-using namespace System::Xml;
+using namespace System::Diagnostics;
+
+using namespace std;
 
 // Global constants
 const int CANVAS_HOR_OFFSET = 10;
@@ -32,8 +35,6 @@ const int BUTTON_HEIGHT = 30;
 const int SYMBOL_BUTTON_HEIGHT = 20;
 const int SYMBOL_BUTTON_WIDTH = 20;
 
-const char STORAGE[] = "dataCache.xml";
-
 enum class ToolState {
 	empty,
 	addPoint,
@@ -42,12 +43,6 @@ enum class ToolState {
 
 // Global variable
 extern ToolState CurrentToolState;
-
-ref class XmlStorage {
-public:
-	static XmlDocument^ XmlDocument;
-	static String^ FileName = gcnew String(STORAGE);
-};
 
 extern bool prevPointFlag;
 extern int prevPointId;
