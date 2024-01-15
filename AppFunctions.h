@@ -38,6 +38,6 @@ public:
     DataStorage();
 };
 
-//extern AppFunctions::DataStorage MyDataStorage;
+extern AppFunctions::DataStorage MyDataStorage;
 
 #endif APP_FUNCTIONS_H

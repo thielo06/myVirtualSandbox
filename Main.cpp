@@ -482,58 +482,69 @@ LRESULT CALLBACK canvasWndProc(
                 {
                     int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
+                    // Return value of -1 means that point was not found.
                     if (pointId != -1) {
-                        break;
+                        // Initialize a mouse tracking event every time the mouse 
+                        // moves. The tracking event stops when the window which 
+                        // handle is specified registers a "WM_MOUSEHOVER"-Message.
+                        TRACKMOUSEEVENT trackMouseEvent = {
+                            sizeof(TRACKMOUSEEVENT),
+                            TME_HOVER,
+                            hCanvasWnd,
+                            25
+                        };
+
+                        TrackMouseEvent(&trackMouseEvent);
+
+                        prevPointId = pointId;
+                        prevPointFlag = true;
+                    } else {
+                        POINT point = {
+                            xValue,
+                            yValue
+                        };
+
+                        AppFunctions::AddPoint(point);
+
+                        InvalidateRect(hCanvasWnd, NULL, FALSE);
+                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+
+                        wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
+
+                        wsprintfW(tempTextBuffer, L"Add Point %i, %i", point.x, point.y);
+
+                        AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
                     }
-
-                    POINT point = {
-                        xValue,
-                        yValue
-                    };
-
-                    AppFunctions::AddPoint(point);
-
-                    InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
-
-                    wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
-
-                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", point.x, point.y);
-
-                    AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
                     break;
                 }
                 case ToolState::selectPoint:
                 {
-                    // If SearchPoint is successfull it returns the 
-                    // value of the ID attribute of the points XML 
-                    // representative. That value is used to modify 
-                    // the corresponding selection state of that point 
-                    // before the canvas is updated. 
-                    // If it fails it returns -1 and the selection 
-                    // state of all points is reset before the canvas 
-                    // is updated.
+                    // Reset flag for selection state update.
+                    prevPointFlag = false;
+
                     int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
                     if (pointId != -1) {
-                        POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
+                        if (MyDataStorage.CanvasData[pointId].selectionState != 2) {
+                            POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
 
-                        InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
-                        // The new operator allocates and initializes an 
-                        // array of wchar_t characters and returns a 
-                        // pointer to it.
-                        LPWSTR tempTextBuffer = new wchar_t[sizeof(L"Select Point %i, %i")];
+                            // The new operator allocates and initializes an 
+                            // array of wchar_t characters and returns a 
+                            // pointer to it.
+                            LPWSTR tempTextBuffer = new wchar_t[sizeof(L"Select Point %i, %i")];
 
-                        wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
+                            wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
 
-                        AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
+                            AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
-                        // Use the delete operator to deallocate the memory 
-                        // allocated by the new operator.
-                        delete[] tempTextBuffer;
+                            // Use the delete operator to deallocate the memory 
+                            // allocated by the new operator.
+                            delete[] tempTextBuffer;
+                        }
                     } else {
                         AppFunctions::ResetSelection();
 
@@ -548,6 +559,17 @@ LRESULT CALLBACK canvasWndProc(
             break;
         }
 
+        case WM_LBUTTONUP:
+        {
+            Debug::WriteLine("Up");
+
+            if (CurrentToolState == ToolState::addPoint) {
+                prevPointFlag = false;
+            }
+
+            break;
+        }
+
         case WM_DESTROY:
         {
 
@@ -556,19 +578,17 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_MOUSEMOVE:
         {
-            if (CurrentToolState == ToolState::selectPoint) {
-                // Initialize a mouse tracking event every time the mouse 
-                // moves. The tracking event stops when the window which 
-                // handle is specified registers a "WM_MOUSEHOVER"-Message.
-                TRACKMOUSEEVENT trackMouseEvent = {
-                    sizeof(TRACKMOUSEEVENT),
-                    TME_HOVER,
-                    hCanvasWnd,
-                    25
-                };
+            // Initialize a mouse tracking event every time the mouse 
+            // moves. The tracking event stops when the window which 
+            // handle is specified registers a "WM_MOUSEHOVER"-Message.
+            TRACKMOUSEEVENT trackMouseEvent = {
+                sizeof(TRACKMOUSEEVENT),
+                TME_HOVER,
+                hCanvasWnd,
+                25
+            };
 
-                TrackMouseEvent(&trackMouseEvent);
-            }
+            TrackMouseEvent(&trackMouseEvent);
 
             break;
         }
@@ -582,30 +602,65 @@ LRESULT CALLBACK canvasWndProc(
 
             int pointId = AppFunctions::SearchPoint(xValue, yValue);
 
-            if (pointId != -1) {
-                int selectionState = AppFunctions::GetSelectionState(pointId);
+            switch (CurrentToolState) {
+                case ToolState::addPoint:
+                {
+                    if (prevPointFlag) {
+                        POINT newPoint = {
+                            xValue,
+                            yValue
+                        };
 
-                if (selectionState != 2) {
-                    AppFunctions::UpdateSelectionState(pointId, 1);
+                        Debug::WriteLine(xValue.ToString(), yValue.ToString());
 
-                    prevPointId = pointId;
-                    prevPointFlag = true;
-
-                    InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
-                }
-            } else {
-                if (prevPointFlag) {
-                    int selectionState = AppFunctions::GetSelectionState(prevPointId);
-
-                    if (selectionState != 2) {
-                        AppFunctions::UpdateSelectionState(prevPointId, 0);
+                        MyDataStorage.CanvasData[prevPointId].position = newPoint;
 
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                        SendMessage(hCanvasWnd, WM_PAINT, NULL, prevPointId);
                     }
 
-                    prevPointFlag = false;
+                    break;
+                }
+
+                case ToolState::selectPoint:
+                {
+                    if (pointId != -1) {
+                        int selectionState = AppFunctions::GetSelectionState(pointId);
+
+                        switch (selectionState) {
+                            case 0:
+                            {
+                                AppFunctions::UpdateSelectionState(pointId, 1);
+
+                                prevPointId = pointId;
+                                prevPointFlag = true;
+
+                                InvalidateRect(hCanvasWnd, NULL, FALSE);
+                                SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+
+                                break;
+                            }
+                            case 1:
+                            {
+
+                                break;
+                            }
+                            case 2:
+                            {
+
+                                break;
+                            }
+                        }
+                    } else {
+                        if (prevPointFlag) {
+                            AppFunctions::UpdateSelectionState(prevPointId, 0);
+
+                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+
+                            prevPointFlag = false;
+                        }
+                    }
                 }
             }
 
