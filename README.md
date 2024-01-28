@@ -1,5 +1,5 @@
 ## About
-This repository is about a project wich was thought of as a windows application that has an user interface and is able to execute several computational methods. The purpose of this project is less to create a high perfomance application than more to learn the programming language it is written in and to understand the computational methods that are used.
+This repository is about a project which was thought of as a windows application that has an user interface and is able to execute several computational methods. The purpose of this project is less to create a high perfomance application than more to learn the programming language it is written in and to understand the computational methods that are used.
 
 It´s written in C++.
 
