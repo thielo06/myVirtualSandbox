@@ -76,10 +76,13 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
 }
 
 // Returns point id if it is found in data storage, -1 if not.
-int AppFunctions::SearchPoint(int xValue, int yValue) {
-    int result = -1;
-    
-    int n = MyDataStorage.CanvasData.size();
+int AppFunctions::SearchDataStorage(POINT point) {
+    int n, result, xValue, yValue;
+
+    n = MyDataStorage.CanvasData.size();
+    result = -1;
+    xValue = point.x;
+    yValue = point.y;
     
     if (n != 0) {
         for (int i = 0; i < n; i++) {

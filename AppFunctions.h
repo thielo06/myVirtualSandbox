@@ -11,7 +11,7 @@ namespace AppFunctions
 
     int GetSelectionState(int pointId);
 
-    int SearchPoint(INT32 xValue, INT32 yValue);
+    int SearchDataStorage(POINT point);
 
     void ResetSelection();
 
