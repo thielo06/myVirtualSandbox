@@ -1,9 +1,7 @@
 #pragma once
 
 #include <dwmapi.h>
-#include <iostream>
 #include <string>
-#include <windows.h>
 #include <windowsx.h>
 #include <vector>
 
@@ -41,8 +39,8 @@ enum class ToolState {
 	selectPoint
 };
 
-// Global variable
+// Global variables
 extern ToolState CurrentToolState;
 
-extern bool prevPointFlag;
-extern int prevPointId;
+extern bool activePointFlag;
+extern int activePointId;

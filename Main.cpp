@@ -479,29 +479,42 @@ LRESULT CALLBACK canvasWndProc(
 
             int pointId = AppFunctions::SearchDataStorage(currentPosition);
 
-            // Return value of -1 means that point was not found. 
+            // If current mouse position was not found in data storage ...
             if (pointId == -1) {
-                if (CurrentToolState == ToolState::addPoint) {
-                    AppFunctions::AddPoint(currentPosition);
+                switch (CurrentToolState) {
+                    // ... add a point.
+                    case ToolState::addPoint:
+                    {
+                        AppFunctions::AddPoint(currentPosition);
 
-                    InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                        InvalidateRect(hCanvasWnd, NULL, FALSE);
+                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
-                    wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
+                        wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
 
-                    wsprintfW(tempTextBuffer, L"Add Point %i, %i", currentPosition.x, currentPosition.y);
+                        wsprintfW(tempTextBuffer, L"Add Point %i, %i", currentPosition.x, currentPosition.y);
 
-                    AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
+                        AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
-                    CurrentToolState = ToolState::empty;
+                        CurrentToolState = ToolState::empty;
+
+                        break;
+                    }
                 }
+            // If current mouse position was found in data storage ...
             } else {
-                // Selection state of a point is 2 if it is selected.
+                // ... set active point flag.
+                activePointId = pointId;
+                activePointFlag = true;
+
+                // Update selection state if point if it is not already 
+                // selected. 
                 if (MyDataStorage.CanvasData[pointId].selectionState != 2) {
+                    AppFunctions::ResetSelection();
                     POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, -1);
 
                     // The new operator allocates and initializes an 
                     // array of wchar_t characters and returns a 
@@ -517,6 +530,15 @@ LRESULT CALLBACK canvasWndProc(
                     delete[] tempTextBuffer;
                 }
             }
+
+            TRACKMOUSEEVENT trackMouseEvent = {
+                sizeof(TRACKMOUSEEVENT),
+                TME_HOVER,
+                hCanvasWnd,
+                10
+            };
+
+            TrackMouseEvent(&trackMouseEvent);
 
             break;
         }
@@ -547,7 +569,7 @@ LRESULT CALLBACK canvasWndProc(
                 sizeof(TRACKMOUSEEVENT),
                 TME_HOVER,
                 hCanvasWnd,
-                25
+                10
             };
 
             TrackMouseEvent(&trackMouseEvent);
@@ -569,25 +591,78 @@ LRESULT CALLBACK canvasWndProc(
 
             int pointId = AppFunctions::SearchDataStorage(currentPosition);
 
+            // If the current mouse position was not found in data 
+            // storage ... 
             if (pointId == -1) {
-                if (prevPointFlag) {
-                    int selectionState = MyDataStorage.CanvasData[prevPointId].selectionState;
+                // ... the further processing is done just if the active 
+                // point flag is set additionally.
+                if (activePointFlag) {
+                    int selectionState = MyDataStorage.CanvasData[activePointId].selectionState;
 
                     switch (selectionState) {
+                        case 0:
+                        {
+
+                            break;
+                        }
+                        // In case the state of the active point is 1 the 
+                        // selection state is reset.
+                        case 1:
+                        {
+                            AppFunctions::UpdateSelectionState(activePointId, 0);
+
+                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            SendMessage(hCanvasWnd, WM_PAINT, uMsg, activePointId);
+
+                            activePointId = -1;
+                            activePointFlag = false;
+
+                            break;
+                        }
+                        // If selection state of the active point is 2 the 
+                        // point the further processing depends on the state 
+                        // of the left mouse button: If it is down the active 
+                        // point is repositioned, otherways it gets 
+                        // deactivated.
+                        case 2:
+                        {
+                            if (GetKeyState(VK_LBUTTON) < 0) {
+                                MyDataStorage.CanvasData[activePointId].position.x = currentPosition.x;
+                                MyDataStorage.CanvasData[activePointId].position.y = currentPosition.y;
+
+                                InvalidateRect(hCanvasWnd, NULL, FALSE);
+                                SendMessage(hCanvasWnd, WM_PAINT, NULL, -1);
+                            } else {
+                                activePointId = -1;
+                                activePointFlag = false;
+                            }
+
+                            break;
+                        }
+                    }
+
+                }
+            // If the current mouse position was found in data storage ...
+            } else {
+                // ... the further processing depends on the selection state 
+                // of the corresponding point.
+                int selectionState = MyDataStorage.CanvasData[pointId].selectionState;
+
+                switch (selectionState) {
                     case 0:
                     {
+                        AppFunctions::UpdateSelectionState(pointId, 1);
+
+                        activePointId = pointId;
+                        activePointFlag = true;
+
+                        InvalidateRect(hCanvasWnd, NULL, FALSE);
+                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
                         break;
                     }
                     case 1:
                     {
-                        AppFunctions::UpdateSelectionState(prevPointId, 0);
-
-                        InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, prevPointId);
-
-                        prevPointId = -1;
-                        prevPointFlag = false;
 
                         break;
                     }
@@ -596,35 +671,6 @@ LRESULT CALLBACK canvasWndProc(
 
                         break;
                     }
-                    }
-
-                }
-            } else {
-                int selectionState = MyDataStorage.CanvasData[pointId].selectionState;
-
-                switch (selectionState) {
-                case 0:
-                {
-                    AppFunctions::UpdateSelectionState(pointId, 1);
-
-                    prevPointId = pointId;
-                    prevPointFlag = true;
-
-                    InvalidateRect(hCanvasWnd, NULL, FALSE);
-                    SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
-
-                    break;
-                }
-                case 1:
-                {
-
-                    break;
-                }
-                case 2:
-                {
-
-                    break;
-                }
                 }
             }
 

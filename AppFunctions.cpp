@@ -2,8 +2,9 @@
 
 // Initialize global variables.
 ToolState CurrentToolState = ToolState::empty;
-bool prevPointFlag = false;
-int prevPointId = -1;
+
+bool activePointFlag = false;
+int activePointId = -1;
 
 AppFunctions::DataStorage MyDataStorage;
 
@@ -207,8 +208,6 @@ int AppFunctions::GetSelectionState(int elementId) {
 }
 
 POINT AppFunctions::UpdateSelectionState(int elementId, int selectionState) {
-    int xValue, yValue;
-
     POINT point;
 
     MyDataStorage.CanvasData[elementId].selectionState = selectionState;
