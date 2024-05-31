@@ -1,7 +1,0 @@
-<!DOCTYPE root[<!ELEMENT root (point)*><!ELEMENT point EMPTY><!ATTLIST point id ID #REQUIRED x CDATA #REQUIRED y CDATA #REQUIRED selectionstate CDATA #REQUIRED>]>
-<root>
-  <point id="0" x="578" y="93" selectionState="0" />
-  <point id="1" x="532" y="245" selectionState="0" />
-  <point id="2" x="333" y="236" selectionState="0" />
-  <point id="3" x="395" y="156" selectionState="0" />
-</root>

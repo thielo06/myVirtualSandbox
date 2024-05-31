@@ -3,8 +3,8 @@
 
 #include "Header.h"
 
-namespace AppFunctions
-{
+namespace AppFunctions {
+    // Forward declaration the class for data storage and subsequent definition.
     class DataStorage;
 
     int DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin);

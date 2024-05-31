@@ -78,6 +78,7 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
 
 // Returns point id if it is found in data storage, -1 if not.
 int AppFunctions::SearchDataStorage(POINT point) {
+    
     int n, result, xValue, yValue;
 
     n = MyDataStorage.CanvasData.size();
@@ -120,7 +121,7 @@ void AppFunctions::ResetSelection() {
 }
 
 void AppFunctions::AddPoint(POINT point) {
-    AppFunctions::DataStorage::ElementData elementData = {
+    DataStorage::ElementData elementData = {
         MyDataStorage.CanvasData.size(),
         "POINT",
         0,
@@ -133,7 +134,7 @@ void AppFunctions::AddPoint(POINT point) {
 void AppFunctions::UpdatePoints(HDC hDeviceContext, int elementId) {
     // Load data storage file and draw all points to handle device 
     // context which is referring to the canvas.
-    AppFunctions::DataStorage::ElementData elementData;
+    DataStorage::ElementData elementData;
 
     int bitmapId, selectionState, xValue, yValue;
 
