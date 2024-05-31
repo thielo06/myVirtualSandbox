@@ -9,7 +9,7 @@ namespace AppFunctions {
 
     int DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin);
 
-    int GetSelectionState(int pointId);
+    SelectionState GetSelectionState(int pointId);
 
     int SearchDataStorage(POINT point);
 
@@ -19,7 +19,7 @@ namespace AppFunctions {
 
     void UpdatePoints(HDC hDeviceContext, int pointId=-1);
 
-    POINT UpdateSelectionState(int pointId, int selectionState);
+    POINT UpdateSelectionState(int pointId, SelectionState selectionState);
 
     void TextOutput(HWND hOutputWnd, LPWSTR tempTextBuffer);
 };
@@ -29,7 +29,7 @@ public:
     struct ElementData {
         int id;
         string type;
-        int selectionState;
+        SelectionState selectionState;
         POINT position;
     };
 

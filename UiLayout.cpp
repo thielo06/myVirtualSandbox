@@ -68,29 +68,41 @@ UiObjects::UiObjects() {
     };
     Objects.push_back(&AddPointButton);
 
-    SelectPointButton = {
-        L"BUTTON",
-        L"Select Button",
-        // With the 'BS_OWNERDRAW'-Option the owner 
-        // window receives a 'WM_DRAWITEM'-Message when
-        // a visual aspect of the button has changed.
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH,
-        CANVAS_VER_OFFSET + SYMBOL_BUTTON_HEIGHT,
-        SYMBOL_BUTTON_WIDTH,
-        SYMBOL_BUTTON_HEIGHT,
-        (HMENU)SelectPointButtonId,
+    HorCoordinateTextBox = {
+        L"EDIT",
+        NULL,
+        WS_VISIBLE | WS_CHILD | ES_MULTILINE,
+        CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + ENTRY_VER_OFFSET,
+        CANVAS_VER_OFFSET,
+        ENTRY_WIDTH,
+        ENTRY_HEIGHT,
+        (HMENU)HorCoordinateTextBoxId,
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&SelectPointButton);
+    Objects.push_back(&HorCoordinateTextBox);
+
+    VerCoordinateTextBox = {
+        L"EDIT",
+        NULL,
+        WS_VISIBLE | WS_CHILD | ES_MULTILINE,
+        CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + ENTRY_VER_OFFSET + ENTRY_WIDTH + ENTRY_VER_OFFSET,
+        CANVAS_VER_OFFSET,
+        ENTRY_WIDTH,
+        ENTRY_HEIGHT,
+        (HMENU)VerCoordinateTextBoxId,
+        NULL,
+        MyColors.ElevatedColorDarkTheme
+
+    };
+    Objects.push_back(&VerCoordinateTextBox);
 
     CloseApplicationButton = {
         L"BUTTON",
         L"Close",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
-        CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + BUTTON_HOR_OFFSET,
-        CANVAS_VER_OFFSET,
+        CANVAS_HOR_OFFSET,
+        CANVAS_VER_OFFSET + CANVAS_HEIGHT + OUTPUT_VER_OFFSET + OUTPUT_HEIGHT + SYMBOL_BUTTON_HEIGHT + BUTTON_VER_OFFSET,
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
         (HMENU)CloseApplicationButtonId,

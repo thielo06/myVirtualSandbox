@@ -1,7 +1,7 @@
 #include "AppFunctions.h"
 
 // Initialize global variables.
-ToolState CurrentToolState = ToolState::empty;
+ToolState CurrentToolState = ToolState::Empty;
 
 bool activePointFlag = false;
 int activePointId = -1;
@@ -113,7 +113,7 @@ void AppFunctions::ResetSelection() {
 
     if (n != 0) {
         for (int i = 0; i < n; i++) {
-            MyDataStorage.CanvasData[i].selectionState = 0;
+            MyDataStorage.CanvasData[i].selectionState = SelectionState::Empty;
         }
     } else {
 
@@ -124,7 +124,7 @@ void AppFunctions::AddPoint(POINT point) {
     DataStorage::ElementData elementData = {
         MyDataStorage.CanvasData.size(),
         "POINT",
-        0,
+        SelectionState::Empty,
         point
     };
 
@@ -203,12 +203,12 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int elementId) {
     }
 }
 
-int AppFunctions::GetSelectionState(int elementId) {
+SelectionState AppFunctions::GetSelectionState(int elementId) {
 
     return MyDataStorage.CanvasData[elementId].selectionState;
 }
 
-POINT AppFunctions::UpdateSelectionState(int elementId, int selectionState) {
+POINT AppFunctions::UpdateSelectionState(int elementId, SelectionState selectionState) {
     POINT point;
 
     MyDataStorage.CanvasData[elementId].selectionState = selectionState;

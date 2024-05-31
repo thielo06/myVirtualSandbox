@@ -103,13 +103,7 @@ LRESULT CALLBACK wndProc(
             switch (controlIdentifier) {
                 case MyObjects.AddPointButtonId:
                 {
-                    CurrentToolState = ToolState::addPoint;
-
-                    break;
-                }
-                case MyObjects.SelectPointButtonId:
-                {
-                    CurrentToolState = ToolState::selectPoint;
+                    CurrentToolState = ToolState::AddPoint;
 
                     break;
                 }
@@ -193,6 +187,10 @@ LRESULT CALLBACK wndProc(
             break;
         }
 
+        // Sent to the parent window of an owner-drawn control when a visual 
+        // aspect of the control has changed.
+        // The owner-drawn style flag implies that the owner of the control 
+        // is responsible for drawing the control.
         case WM_DRAWITEM:
         {
             HDC hDeviceContext;
@@ -229,17 +227,6 @@ LRESULT CALLBACK wndProc(
                     }
                     else {
                         AppFunctions::DrawBitmap(IDB_BITMAP4, hDeviceContext, 0, 0, L"nw");
-                    }
-
-                    break;
-                }
-                case MyObjects.SelectPointButtonId:
-                {
-                    if (itemState & ODS_SELECTED) {
-                        AppFunctions::DrawBitmap(IDB_BITMAP7, hDeviceContext, 0, 0, L"nw");
-                    }
-                    else {
-                        AppFunctions::DrawBitmap(IDB_BITMAP6, hDeviceContext, 0, 0, L"nw");
                     }
 
                     break;
@@ -418,7 +405,7 @@ LRESULT CALLBACK canvasWndProc(
     {
         case WM_CREATE:
         {
-            ToolState currentToolState = ToolState::empty;
+            ToolState currentToolState = ToolState::Empty;
 
             break;
         }
@@ -464,14 +451,6 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_LBUTTONDOWN:
         {
-            HWND hOutputWnd;
-            LPWSTR textOutput, wndTextBuffer;
-
-            int xValue, yValue, textLength, wndTextLength;
-
-            xValue = GET_X_LPARAM(lParam);
-            yValue = GET_Y_LPARAM(lParam);
-
             POINT currentPosition = {
                 GET_X_LPARAM(lParam),
                 GET_Y_LPARAM(lParam)
@@ -483,7 +462,7 @@ LRESULT CALLBACK canvasWndProc(
             if (pointId == -1) {
                 switch (CurrentToolState) {
                     // ... add a point.
-                    case ToolState::addPoint:
+                    case ToolState::AddPoint:
                     {
                         AppFunctions::AddPoint(currentPosition);
 
@@ -496,7 +475,7 @@ LRESULT CALLBACK canvasWndProc(
 
                         AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
-                        CurrentToolState = ToolState::empty;
+                        CurrentToolState = ToolState::Empty;
 
                         break;
                     }
@@ -509,9 +488,9 @@ LRESULT CALLBACK canvasWndProc(
 
                 // Update selection state if point if it is not already 
                 // selected. 
-                if (MyDataStorage.CanvasData[pointId].selectionState != 2) {
+                if (MyDataStorage.CanvasData[pointId].selectionState != SelectionState::Selected) {
                     AppFunctions::ResetSelection();
-                    POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, 2);
+                    POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, SelectionState::Selected);
 
                     InvalidateRect(hCanvasWnd, NULL, FALSE);
                     SendMessage(hCanvasWnd, WM_PAINT, uMsg, -1);
@@ -579,11 +558,6 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_MOUSEHOVER:
         {
-            INT32 xValue, yValue;
-
-            xValue = GET_X_LPARAM(lParam);
-            yValue = GET_Y_LPARAM(lParam);
-
             POINT currentPosition = {
                 GET_X_LPARAM(lParam),
                 GET_Y_LPARAM(lParam)
@@ -597,19 +571,19 @@ LRESULT CALLBACK canvasWndProc(
                 // ... the further processing is done just if the active 
                 // point flag is set additionally.
                 if (activePointFlag) {
-                    int selectionState = MyDataStorage.CanvasData[activePointId].selectionState;
+                    SelectionState currentSelectionState = MyDataStorage.CanvasData[activePointId].selectionState;
 
-                    switch (selectionState) {
-                        case 0:
+                    switch (currentSelectionState) {
+                        case SelectionState::Empty:
                         {
 
                             break;
                         }
                         // In case the state of the active point is 1 the 
                         // selection state is reset.
-                        case 1:
+                        case SelectionState::Hovering:
                         {
-                            AppFunctions::UpdateSelectionState(activePointId, 0);
+                            AppFunctions::UpdateSelectionState(activePointId, SelectionState::Empty);
 
                             InvalidateRect(hCanvasWnd, NULL, FALSE);
                             SendMessage(hCanvasWnd, WM_PAINT, uMsg, activePointId);
@@ -620,13 +594,13 @@ LRESULT CALLBACK canvasWndProc(
                             break;
                         }
                         // If selection state of the active point is 2 the 
-                        // point the further processing depends on the state 
+                        // further processing depends on the state 
                         // of the left mouse button: If it is down the active 
                         // point is repositioned, otherways it gets 
                         // deactivated.
-                        case 2:
+                        case SelectionState::Selected:
                         {
-                            if (GetKeyState(VK_LBUTTON) < 0) {
+                            if (wParam == MK_LBUTTON) {
                                 MyDataStorage.CanvasData[activePointId].position.x = currentPosition.x;
                                 MyDataStorage.CanvasData[activePointId].position.y = currentPosition.y;
 
@@ -646,27 +620,29 @@ LRESULT CALLBACK canvasWndProc(
             } else {
                 // ... the further processing depends on the selection state 
                 // of the corresponding point.
-                int selectionState = MyDataStorage.CanvasData[pointId].selectionState;
+                SelectionState currentSelectionState = MyDataStorage.CanvasData[pointId].selectionState;
 
-                switch (selectionState) {
-                    case 0:
+                switch (currentSelectionState) {
+                    case SelectionState::Empty:
                     {
-                        AppFunctions::UpdateSelectionState(pointId, 1);
+                        if (wParam != MK_LBUTTON) {
+                            AppFunctions::UpdateSelectionState(pointId, SelectionState::Hovering);
 
-                        activePointId = pointId;
-                        activePointFlag = true;
+                            activePointId = pointId;
+                            activePointFlag = true;
 
-                        InvalidateRect(hCanvasWnd, NULL, FALSE);
-                        SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
+                        }
 
                         break;
                     }
-                    case 1:
+                    case SelectionState::Hovering:
                     {
 
                         break;
                     }
-                    case 2:
+                    case SelectionState::Selected:
                     {
 
                         break;

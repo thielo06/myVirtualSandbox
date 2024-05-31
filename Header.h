@@ -30,13 +30,23 @@ const int BUTTON_VER_OFFSET = 10;
 const int BUTTON_WIDTH = 100;
 const int BUTTON_HEIGHT = 30;
 
+const int ENTRY_HOR_OFFSET = 10;
+const int ENTRY_VER_OFFSET = 10;
+const int ENTRY_WIDTH = 60;
+const int ENTRY_HEIGHT = 20;
+
 const int SYMBOL_BUTTON_HEIGHT = 20;
 const int SYMBOL_BUTTON_WIDTH = 20;
 
 enum class ToolState {
-	empty,
-	addPoint,
-	selectPoint
+	Empty,
+	AddPoint
+};
+
+enum class SelectionState {
+	Empty,
+	Hovering,
+	Selected
 };
 
 // Global variables
