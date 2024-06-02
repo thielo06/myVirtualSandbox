@@ -56,7 +56,7 @@ public:
 
     // Declare a vector class as a container of pointers to the 
     // "Object"-Elements.
-    vector<Object*> Objects;
+    vector<Object*> pObjects;
 
     UiObjects();
 } MyObjects;

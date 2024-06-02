@@ -15,6 +15,15 @@ LRESULT CALLBACK canvasWndProc(
     LPARAM lParam
 );
 
+WNDPROC pOrigEditWndProc = NULL;
+
+LRESULT CALLBACK editWndProc(
+    HWND hWnd,
+    UINT uMsg,
+    WPARAM wParam,
+    LPARAM lParam
+);
+
 int __stdcall wWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -96,9 +105,10 @@ LRESULT CALLBACK wndProc(
         // "hMenu"-Parameter.
         case WM_COMMAND:
         {
-            DWORD controlIdentifier;
+            DWORD controlIdentifier, notificationCode;
 
             controlIdentifier = LOWORD(wParam);
+            notificationCode = HIWORD(wParam);
 
             switch (controlIdentifier) {
                 case MyObjects.AddPointButtonId:
@@ -133,7 +143,7 @@ LRESULT CALLBACK wndProc(
         {
             HFONT hFont;
             HINSTANCE hInstance;
-            WNDCLASS canvasWndClass;
+            WNDCLASS canvasWndClass, textBoxWndClass;
 
             // Create a font object that is used for all windows from 
             // the default font of user interface objects.
@@ -151,8 +161,8 @@ LRESULT CALLBACK wndProc(
 
             // The following loop iterates through the container of user 
             // interface objects.
-            for (int i = 0; i < (int)MyObjects.Objects.size(); i++) {
-                UiObjects::Object* pObject = MyObjects.Objects[i];
+            for (int i = 0; i < (int)MyObjects.pObjects.size(); i++) {
+                UiObjects::Object* pObject = MyObjects.pObjects[i];
                 
                 HWND hObjectWnd;
                 
@@ -173,6 +183,27 @@ LRESULT CALLBACK wndProc(
                 // Send 'WM_SETFONT' message to each window to set the 
                 // font to default font for user interface objects. 
                 SendMessage(hObjectWnd, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+                // In this case the menu handle specifies a child-window 
+                // identifier which has to be cast into an integer to perform 
+                // a comparison.
+                // Catch the edit control windows ...
+                switch ((int)pObject->hMenu) {
+                    case MyObjects.HorCoordinateTextBoxId:
+                    {
+
+                    }
+                    case MyObjects.VerCoordinateTextBoxId:
+                    {
+                        pOrigEditWndProc = (WNDPROC)SetWindowLongPtr(
+                            hObjectWnd,
+                            GWLP_WNDPROC,
+                            (LONG_PTR)editWndProc
+                        );
+
+                        break;
+                    }
+                }
 
                 pObject->hObjectWnd = hObjectWnd;
             }
@@ -470,7 +501,6 @@ LRESULT CALLBACK canvasWndProc(
                         SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
                         wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
-
                         wsprintfW(tempTextBuffer, L"Add Point %i, %i", currentPosition.x, currentPosition.y);
 
                         AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
@@ -662,3 +692,23 @@ LRESULT CALLBACK canvasWndProc(
 
     return DefWindowProc(hCanvasWnd, uMsg, wParam, lParam);
 }
+
+LRESULT CALLBACK editWndProc(
+    HWND hEditWnd,
+    UINT uMsg,
+    WPARAM wParam,
+    LPARAM lParam
+) {
+    switch (uMsg) {
+        case WM_CHAR: 
+        {
+            if (wParam >= '0' && wParam <= '9' || wParam == ',') {
+                break;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    return CallWindowProc(pOrigEditWndProc, hEditWnd, uMsg, wParam, lParam);
+};

@@ -32,7 +32,7 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&Canvas);
+    pObjects.push_back(&Canvas);
 
     Output = {
         L"EDIT",
@@ -49,7 +49,7 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&Output);
+    pObjects.push_back(&Output);
 
     AddPointButton = {
         L"BUTTON",
@@ -57,7 +57,7 @@ UiObjects::UiObjects() {
         // With the 'BS_OWNERDRAW'-Option the owner 
         // window receives a 'WM_DRAWITEM'-Message when
         // a visual aspect of the button has changed.
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+        WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH,
         CANVAS_VER_OFFSET,
         SYMBOL_BUTTON_WIDTH,
@@ -66,12 +66,12 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&AddPointButton);
+    pObjects.push_back(&AddPointButton);
 
     HorCoordinateTextBox = {
         L"EDIT",
         NULL,
-        WS_VISIBLE | WS_CHILD | ES_MULTILINE,
+        WS_VISIBLE | WS_CHILD | ES_RIGHT,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + ENTRY_VER_OFFSET,
         CANVAS_VER_OFFSET,
         ENTRY_WIDTH,
@@ -80,12 +80,12 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&HorCoordinateTextBox);
+    pObjects.push_back(&HorCoordinateTextBox);
 
     VerCoordinateTextBox = {
         L"EDIT",
         NULL,
-        WS_VISIBLE | WS_CHILD | ES_MULTILINE,
+        WS_VISIBLE | WS_CHILD | ES_RIGHT,
         CANVAS_HOR_OFFSET + CANVAS_WIDTH + SYMBOL_BUTTON_WIDTH + ENTRY_VER_OFFSET + ENTRY_WIDTH + ENTRY_VER_OFFSET,
         CANVAS_VER_OFFSET,
         ENTRY_WIDTH,
@@ -95,12 +95,12 @@ UiObjects::UiObjects() {
         MyColors.ElevatedColorDarkTheme
 
     };
-    Objects.push_back(&VerCoordinateTextBox);
+    pObjects.push_back(&VerCoordinateTextBox);
 
     CloseApplicationButton = {
         L"BUTTON",
         L"Close",
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+        WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET + CANVAS_HEIGHT + OUTPUT_VER_OFFSET + OUTPUT_HEIGHT + SYMBOL_BUTTON_HEIGHT + BUTTON_VER_OFFSET,
         BUTTON_WIDTH,
@@ -109,12 +109,12 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&CloseApplicationButton);
+    pObjects.push_back(&CloseApplicationButton);
 
     ResetOutputButton = {
         L"BUTTON",
         L"Reset Output",
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+        WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
         CANVAS_HOR_OFFSET,
         CANVAS_VER_OFFSET + CANVAS_HEIGHT + OUTPUT_VER_OFFSET + OUTPUT_HEIGHT,
         SYMBOL_BUTTON_WIDTH,
@@ -123,5 +123,5 @@ UiObjects::UiObjects() {
         NULL,
         MyColors.ElevatedColorDarkTheme
     };
-    Objects.push_back(&ResetOutputButton);
+    pObjects.push_back(&ResetOutputButton);
 }
