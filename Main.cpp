@@ -24,6 +24,8 @@ LRESULT CALLBACK editWndProc(
     LPARAM lParam
 );
 
+#pragma comment(lib, "winmm.lib")
+
 int __stdcall wWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -705,6 +707,7 @@ LRESULT CALLBACK editWndProc(
             if (wParam >= '0' && wParam <= '9' || wParam == ',') {
                 break;
             } else {
+                PlaySound((LPCWSTR)SND_ALIAS_SYSTEMDEFAULT, NULL, SND_ALIAS_ID | SND_ASYNC);
                 return 0;
             }
         }

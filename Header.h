@@ -1,14 +1,21 @@
 #pragma once
 
-#include <dwmapi.h>
+// C++ Standard Library Headers
 #include <string>
-#include <windowsx.h>
 #include <vector>
 
-#include "Resource.h"
+// External Library Headers
 
-// Following DLL are part of the .NET desktop development workload 
-// which is a framework that is not native to C++.
+// System- and Framework-specific Headers
+#include <windows.h> // Basic Windows-API
+#include <windowsx.h> // Additional Macros and Inline-Functions
+#include <mmsystem.h> // Header-File for Multimedia-Functions
+#include <dwmapi.h> // Header-File for Desktop Window Manager
+
+// Project-specific Headers
+#include "resource.h"
+
+// .NET Libraries
 #using <System.dll>
 
 using namespace System;
