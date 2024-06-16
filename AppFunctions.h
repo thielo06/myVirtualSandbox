@@ -7,7 +7,32 @@ namespace AppFunctions {
     // Forward declaration the class for data storage and subsequent definition.
     class DataStorage;
 
-    int DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin);
+    enum class Alignment {
+        North,
+        NorthEast,
+        East,
+        SouthEast,
+        South,
+        SouthWest,
+        West,
+        NorthWest,
+        Center
+    };
+
+    int DrawBitmap(
+        HDC hDeviceContext,
+        INT bitmapId,
+        LONG bitmapX,
+        LONG bitmapY,
+        Alignment bitmapOrigin = AppFunctions::Alignment::Center
+    );
+
+    int DrawCanvasBitmap(
+        HDC hDeviceContext,
+        int* objectIdArray,
+        int objectIdArraySize,
+        Alignment bitmapOrigin = AppFunctions::Alignment::Center
+    );
 
     SelectionState GetSelectionState(int pointId);
 
@@ -26,14 +51,14 @@ namespace AppFunctions {
 
 class AppFunctions::DataStorage {
 public:
-    struct ElementData {
+    struct ObjectData {
         int id;
         string type;
         SelectionState selectionState;
         POINT position;
     };
 
-    vector<ElementData> CanvasData;
+    vector<ObjectData> CanvasData;
 
     DataStorage();
 };

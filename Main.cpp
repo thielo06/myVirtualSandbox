@@ -256,10 +256,20 @@ LRESULT CALLBACK wndProc(
                     // this case.
 
                     if (itemState & ODS_SELECTED) {
-                        AppFunctions::DrawBitmap(IDB_BITMAP5, hDeviceContext, 0, 0, L"nw");
+                        AppFunctions::DrawBitmap(
+                            hDeviceContext,
+                            IDB_BITMAP5,
+                            0, 0,
+                            AppFunctions::Alignment::NorthWest
+                        );
                     }
                     else {
-                        AppFunctions::DrawBitmap(IDB_BITMAP4, hDeviceContext, 0, 0, L"nw");
+                        AppFunctions::DrawBitmap(
+                            hDeviceContext,
+                            IDB_BITMAP4,
+                            0, 0,
+                            AppFunctions::Alignment::NorthWest
+                        );
                     }
 
                     break;
@@ -309,9 +319,19 @@ LRESULT CALLBACK wndProc(
                 case MyObjects.ResetOutputButtonId:
                 {
                     if (itemState & ODS_SELECTED) {
-                        AppFunctions::DrawBitmap(IDB_BITMAP2, hDeviceContext, 0, 0, L"nw");
+                        AppFunctions::DrawBitmap(
+                            hDeviceContext,
+                            IDB_BITMAP2,
+                            0, 0,
+                            AppFunctions::Alignment::NorthWest
+                        );
                     } else {
-                        AppFunctions::DrawBitmap(IDB_BITMAP1, hDeviceContext, 0, 0, L"nw");
+                        AppFunctions::DrawBitmap(
+                            hDeviceContext,
+                            IDB_BITMAP1,
+                            0, 0,
+                            AppFunctions::Alignment::NorthWest
+                        );
                     }
 
                     break;
@@ -448,34 +468,53 @@ LRESULT CALLBACK canvasWndProc(
         // itself or the operating system.
         case WM_PAINT:
         {
-            HBRUSH hBrush;
-            HDC hDeviceContext;
-
             // The "rcPaint" member of the "PAINTSTRCUT" structure 
             // returns a "RECT" structure that specifies the upper 
-            // left and lower right corners of the rectangle in wich 
+            // left and lower right corners of the rectangle in which 
             // the painting is requested.
             PAINTSTRUCT paintStruct;
 
-            hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
-
-            hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+            HDC hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
 
             if (wParam == WM_LBUTTONDOWN || wParam == WM_MOUSEHOVER) {
                 // Update a single object.
                 AppFunctions::UpdatePoints(hDeviceContext, lParam);
             } else {
                 // Update all objects.
-                FillRect(
+                HBRUSH hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+                HDC hDeviceContextBuffer = CreateCompatibleDC(hDeviceContext);
+
+                HBITMAP hBitmapBuffer = CreateCompatibleBitmap(
                     hDeviceContext,
+                    paintStruct.rcPaint.right,
+                    paintStruct.rcPaint.bottom
+                );
+
+                HBITMAP hBitmapOldBuffer = (HBITMAP)SelectObject(hDeviceContextBuffer, hBitmapBuffer);
+                
+                FillRect(
+                    hDeviceContextBuffer,
                     &paintStruct.rcPaint,
                     hBrush
                 );
 
-                AppFunctions::UpdatePoints(hDeviceContext, -1);
-            }
+                AppFunctions::UpdatePoints(hDeviceContextBuffer, -1);
 
-            DeleteObject(hBrush);
+                BitBlt(
+                    hDeviceContext,
+                    0, 0,
+                    paintStruct.rcPaint.right,
+                    paintStruct.rcPaint.bottom,
+                    hDeviceContextBuffer,
+                    0, 0,
+                    SRCCOPY
+                );
+
+                SelectObject(hDeviceContextBuffer, hBitmapOldBuffer);
+                DeleteObject(hBitmapOldBuffer);
+                DeleteObject(hBrush);
+                DeleteDC(hDeviceContextBuffer);
+            }
 
             EndPaint(hCanvasWnd, &paintStruct);
 
@@ -499,6 +538,11 @@ LRESULT CALLBACK canvasWndProc(
                     {
                         AppFunctions::AddPoint(currentPosition);
 
+                        pointId = AppFunctions::SearchDataStorage(currentPosition);
+
+                        activePointId = pointId;
+                        activePointFlag = true;
+
                         InvalidateRect(hCanvasWnd, NULL, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
@@ -507,7 +551,7 @@ LRESULT CALLBACK canvasWndProc(
 
                         AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
-                        CurrentToolState = ToolState::Empty;
+                        //CurrentToolState = ToolState::Empty;
 
                         break;
                     }

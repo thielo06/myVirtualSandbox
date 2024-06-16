@@ -12,55 +12,54 @@ AppFunctions::DataStorage::DataStorage() {
     CanvasData = {};
 };
 
-int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LONG bitmapY, LPWSTR bitmapOrigin = L"c") {
+int AppFunctions::DrawBitmap(
+    HDC hDeviceContext,
+    INT bitmapId,
+    LONG bitmapX,
+    LONG bitmapY,
+    AppFunctions::Alignment bitmapOrigin
+) {
     BITMAP bitmap;
-    HBITMAP hBitmap;
-    HDC hMemoryDeviceContext;
-    HGDIOBJ hOldBitmap;
-    INT status, bitmapOriginX, bitmapOriginY;
-    LPWSTR bitmapResource;
 
-    bitmapResource = MAKEINTRESOURCE(bitmapId);
+    int bitmapOriginX, bitmapOriginY;
 
-    // Create a handle from the bitmap resource.
-    hBitmap = LoadBitmapW(
+    // Create a handle as a reference to the bitmap resource.
+    HBITMAP hBitmap = LoadBitmap(
         GetModuleHandle(NULL),
-        bitmapResource
+        MAKEINTRESOURCE(bitmapId)
     );
 
-    // Create a compatible device context in reference 
-    // to the device context of item structure.
-    hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
-
-    // Select the bitmap handle to the memory device 
-    // context and store a copy of it in a variable.
-    // The return value is, if the funtion succeeds and the 
-    // selected object is not a region, is a handle to the 
-    // object that is being replaced.
-    hOldBitmap = SelectObject(hMemoryDeviceContext, hBitmap);
-
-    DeleteObject(hBitmap);
-
-    // Read graphical information from the handle 
-    // and write it to the buffer at specified 
-    // location.
-    bitmap = {};
+    // Bitmap data of the referenced handle is written to the buffer.
     GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
-    bitmapOriginX = bitmapX - bitmap.bmWidth / 2;
-    bitmapOriginY = bitmapY - bitmap.bmHeight / 2;
+    HDC hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
 
-    if (!lstrcmpW(bitmapOrigin, L"nw")) {
-        bitmapOriginX = bitmapX;
-        bitmapOriginY = bitmapY;
+    SelectObject(hMemoryDeviceContext, hBitmap);
+
+    switch (bitmapOrigin) {
+        case (AppFunctions::Alignment::NorthWest):
+        {
+            bitmapOriginX = bitmapX;
+            bitmapOriginY = bitmapY;
+
+            break;
+        }
+        case (AppFunctions::Alignment::Center):
+        {
+            //...
+        }
+        default: {
+            bitmapOriginX = bitmapX - bitmap.bmWidth / 2;
+            bitmapOriginY = bitmapY - bitmap.bmHeight / 2;
+            
+            break;
+        }
     }
 
-    // Perform a bit block transfer between the source 
-    // device context and the device context of the 
-    // item structure.
-    status = BitBlt(
+    BitBlt(
         hDeviceContext,
-        bitmapOriginX, bitmapOriginY,
+        bitmapOriginX,
+        bitmapOriginY,
         bitmap.bmWidth,
         bitmap.bmHeight,
         hMemoryDeviceContext,
@@ -68,13 +67,109 @@ int AppFunctions::DrawBitmap(INT bitmapId, HDC hDeviceContext, LONG bitmapX, LON
         SRCCOPY
     );
 
-    // Select the original bitmap handle to the source 
-    // device context and delete the object.
-    SelectObject(hMemoryDeviceContext, hOldBitmap);
+    DeleteObject(hBitmap);
     DeleteDC(hMemoryDeviceContext);
 
-    return status;
-}
+    return 0;
+};
+
+int AppFunctions::DrawCanvasBitmap(
+    HDC hDeviceContext,
+    int* objectIdArray,
+    int objectIdArraySize,
+    AppFunctions::Alignment bitmapOrigin
+) {
+    for (int i = 0; i < objectIdArraySize; i++) {
+        BITMAP bitmap;
+
+        int bitmapId, bitmapX, bitmapY, bitmapOriginX, bitmapOriginY;
+
+        // Get the object ID of the current element of the array and create a 
+        // copy of the corresponding object.
+        int objectId = objectIdArray[i];
+        AppFunctions::DataStorage::ObjectData object = MyDataStorage.CanvasData[objectId];
+
+        // Define the bitmap to be drawn in relation to the selection state 
+        // of the object.
+        switch (object.selectionState) {
+            case SelectionState::Hovering:
+            {
+                bitmapId = IDB_BITMAP9;
+
+                break;
+            }
+            case SelectionState::Selected:
+            {
+                bitmapId = IDB_BITMAP8;
+
+                break;
+            }
+            case SelectionState::Empty:
+            {
+                // ...
+            }
+            default:
+            {
+                bitmapId = IDB_BITMAP3;
+
+                break;
+            }
+        }
+
+        // Define the position where to be drawn in relation to the object´s position.
+        bitmapX = object.position.x;
+        bitmapY = object.position.y;
+
+        // Create a handle as a reference to the bitmap resource.
+        HBITMAP hBitmap = LoadBitmap(
+            GetModuleHandle(NULL),
+            MAKEINTRESOURCE(bitmapId)
+        );
+
+        // Bitmap data of the referenced handle is written to the buffer.
+        GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+        HDC hMemoryDeviceContext = CreateCompatibleDC(hDeviceContext);
+
+        SelectObject(hMemoryDeviceContext, hBitmap);
+
+        switch (bitmapOrigin) {
+            case (AppFunctions::Alignment::NorthWest):
+            {
+                bitmapOriginX = bitmapX;
+                bitmapOriginY = bitmapY;
+
+                break;
+            }
+            case (AppFunctions::Alignment::Center):
+            {
+                //...
+            }
+            default: {
+                bitmapOriginX = bitmapX - bitmap.bmWidth / 2;
+                bitmapOriginY = bitmapY - bitmap.bmHeight / 2;
+
+                break;
+            }
+        }
+
+        BitBlt(
+            hDeviceContext,
+            bitmapOriginX,
+            bitmapOriginY,
+            bitmap.bmWidth,
+            bitmap.bmHeight,
+            hMemoryDeviceContext,
+            0, 0,
+            SRCCOPY
+        );
+
+        DeleteObject(hBitmap);
+        DeleteDC(hMemoryDeviceContext);
+    }
+
+    return 0;
+};
 
 // Returns point id if it is found in data storage, -1 if not.
 int AppFunctions::SearchDataStorage(POINT point) {
@@ -88,7 +183,7 @@ int AppFunctions::SearchDataStorage(POINT point) {
     
     if (n != 0) {
         for (int i = 0; i < n; i++) {
-            DataStorage::ElementData elementData = MyDataStorage.CanvasData[i];
+            DataStorage::ObjectData elementData = MyDataStorage.CanvasData[i];
 
             int xCompare, yCompare;
 
@@ -121,86 +216,44 @@ void AppFunctions::ResetSelection() {
 }
 
 void AppFunctions::AddPoint(POINT point) {
-    DataStorage::ElementData elementData = {
+    DataStorage::ObjectData elementData = {
         MyDataStorage.CanvasData.size(),
         "POINT",
-        SelectionState::Empty,
+        SelectionState::Hovering,
         point
     };
 
     MyDataStorage.CanvasData.push_back(elementData);
 }
 
-void AppFunctions::UpdatePoints(HDC hDeviceContext, int elementId) {
-    // Load data storage file and draw all points to handle device 
-    // context which is referring to the canvas.
-    DataStorage::ElementData elementData;
+void AppFunctions::UpdatePoints(HDC hDeviceContext, int objectId) {
+    int objectIdArraySize;
+    int* objectIdArray;
 
-    int bitmapId, selectionState, xValue, yValue;
+    if (objectId == -1) {
+        // Update all objects within the canvas by creating an array from all 
+        // storage entries and passing it to DrawCanvasBitmap-Function.
+        objectIdArraySize = MyDataStorage.CanvasData.size();
+        objectIdArray = new int[objectIdArraySize];
 
-    if (elementId != -1) {
-        elementData = MyDataStorage.CanvasData[elementId];
-
-        xValue = elementData.position.x;
-        yValue = elementData.position.y;
-
-        switch (elementData.selectionState) {
-            case 0: // not selected
-            {
-                DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
-
-                break;
-            }
-            case 1: // hovering
-            {
-                DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
-
-                break;
-            }
-            case 2: // selected
-            {
-                DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
-
-                break;
-            }
+        for (int i = 0; i < objectIdArraySize; i++) {
+            objectIdArray[i] = MyDataStorage.CanvasData[i].id;
         }
+
+        DrawCanvasBitmap(hDeviceContext, objectIdArray, objectIdArraySize);
     } else {
-        int n = MyDataStorage.CanvasData.size();
+        // Update just a single object within the canvas by creating an array 
+        // from a specified storage entry and passing it to DrawCanvasBitmap-
+        // Function.
+        objectIdArraySize = 1;
+        objectIdArray = new int[objectIdArraySize];
 
-        if (n != 0) {
-            for (int i = 0; i < n; i++) {
-                DataStorage::ElementData elementData = MyDataStorage.CanvasData[i];
+        objectIdArray[0] = MyDataStorage.CanvasData[objectId].id;
 
-                int xValue, yValue;
-
-                xValue = elementData.position.x;
-                yValue = elementData.position.y;
-
-                switch (elementData.selectionState) {
-                    case 0: // not selected
-                    {
-                        DrawBitmap(IDB_BITMAP3, hDeviceContext, xValue, yValue);
-
-                        break;
-                    }
-                    case 1: // hovering
-                    {
-                        DrawBitmap(IDB_BITMAP9, hDeviceContext, xValue, yValue);
-
-                        break;
-                    }
-                    case 2: // selected
-                    {
-                        DrawBitmap(IDB_BITMAP8, hDeviceContext, xValue, yValue);
-
-                        break;
-                    }
-                }
-            }
-        } else {
-
-        }
+        DrawCanvasBitmap(hDeviceContext, objectIdArray, objectIdArraySize);
     }
+
+    delete[] objectIdArray;
 }
 
 SelectionState AppFunctions::GetSelectionState(int elementId) {
