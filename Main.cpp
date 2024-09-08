@@ -143,17 +143,13 @@ LRESULT CALLBACK wndProc(
 
         case WM_CREATE:
         {
-            HFONT hFont;
-            HINSTANCE hInstance;
-            WNDCLASS canvasWndClass, textBoxWndClass;
-
             // Create a font object that is used for all windows from 
             // the default font of user interface objects.
-            hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+            HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-            hInstance = (HINSTANCE)GetModuleHandle(NULL);
+            HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(NULL);
 
-            canvasWndClass = { };
+            WNDCLASS canvasWndClass = { };
 
             canvasWndClass.lpfnWndProc = canvasWndProc;
             canvasWndClass.hInstance = hInstance;
@@ -166,9 +162,7 @@ LRESULT CALLBACK wndProc(
             for (int i = 0; i < (int)MyObjects.pObjects.size(); i++) {
                 UiObjects::Object* pObject = MyObjects.pObjects[i];
                 
-                HWND hObjectWnd;
-                
-                hObjectWnd = CreateWindow(
+                HWND hObjectWnd = CreateWindow(
                     pObject->lpClassName, // Window class
                     pObject->lpWindowName,    // Window text
                     pObject->dwStyle, // Styles 
@@ -476,12 +470,24 @@ LRESULT CALLBACK canvasWndProc(
 
             HDC hDeviceContext = BeginPaint(hCanvasWnd, &paintStruct);
 
+            HBRUSH hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
+            HBRUSH hBrushFrame = CreateSolidBrush(MyColors.BlueAccentDarkTheme);
+
             if (wParam == WM_LBUTTONDOWN || wParam == WM_MOUSEHOVER) {
+                FillRect(
+                    hDeviceContext,
+                    &paintStruct.rcPaint,
+                    hBrush
+                );
+                FrameRect(
+                    hDeviceContext,
+                    &paintStruct.rcPaint,
+                    hBrushFrame
+                );
                 // Update a single object.
-                AppFunctions::UpdatePoints(hDeviceContext, lParam);
+                AppFunctions::UpdateObjects(hDeviceContext, lParam);
             } else {
                 // Update all objects.
-                HBRUSH hBrush = CreateSolidBrush(MyColors.ElevatedColorDarkTheme);
                 HDC hDeviceContextBuffer = CreateCompatibleDC(hDeviceContext);
 
                 HBITMAP hBitmapBuffer = CreateCompatibleBitmap(
@@ -498,7 +504,7 @@ LRESULT CALLBACK canvasWndProc(
                     hBrush
                 );
 
-                AppFunctions::UpdatePoints(hDeviceContextBuffer, -1);
+                AppFunctions::UpdateObjects(hDeviceContextBuffer, -1);
 
                 BitBlt(
                     hDeviceContext,
@@ -538,12 +544,39 @@ LRESULT CALLBACK canvasWndProc(
                     {
                         AppFunctions::AddPoint(currentPosition);
 
+                        BITMAP bitmap;
+
+                        // Create a handle as a reference to the bitmap resource.
+                        HBITMAP hBitmap = LoadBitmap(
+                            GetModuleHandle(NULL),
+                            MAKEINTRESOURCE(IDB_BITMAP3)
+                        );
+
+                        // Bitmap data of the referenced handle is written to the buffer.
+                        GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                        INT bitmapOffsetX = bitmap.bmWidth / 2;
+                        INT bitmapOffsetY = bitmap.bmHeight / 2;
+
+                        RECT updateRectangle = {
+                            // left
+                            currentPosition.x - bitmapOffsetX,
+                            // top
+                            currentPosition.y - bitmapOffsetY,
+                            // right
+                            currentPosition.x + bitmapOffsetX + 1,
+                            // bottom
+                            currentPosition.y + bitmapOffsetY + 1
+                        };
+
+                        DeleteObject(hBitmap);
+
                         pointId = AppFunctions::SearchDataStorage(currentPosition);
 
                         activePointId = pointId;
                         activePointFlag = true;
 
-                        InvalidateRect(hCanvasWnd, NULL, FALSE);
+                        InvalidateRect(hCanvasWnd, &updateRectangle, FALSE);
                         SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
 
                         wchar_t tempTextBuffer[sizeof(L"Add Point %i, %i")];
@@ -562,13 +595,43 @@ LRESULT CALLBACK canvasWndProc(
                 activePointId = pointId;
                 activePointFlag = true;
 
+                POINT activePosition = MyDataStorage.CanvasObjects[activePointId].position;
+
                 // Update selection state if point if it is not already 
                 // selected. 
-                if (MyDataStorage.CanvasData[pointId].selectionState != SelectionState::Selected) {
+                if (MyDataStorage.CanvasObjects[pointId].selectionState != SelectionState::Selected) {
                     AppFunctions::ResetSelection();
-                    POINT pointToSelect = AppFunctions::UpdateSelectionState(pointId, SelectionState::Selected);
 
-                    InvalidateRect(hCanvasWnd, NULL, FALSE);
+                    MyDataStorage.CanvasObjects[activePointId].selectionState = SelectionState::Selected;
+
+                    BITMAP bitmap;
+
+                    // Create a handle as a reference to the bitmap resource.
+                    HBITMAP hBitmap = LoadBitmap(
+                        GetModuleHandle(NULL),
+                        MAKEINTRESOURCE(IDB_BITMAP8)
+                    );
+
+                    // Bitmap data of the referenced handle is written to the buffer.
+                    GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                    INT bitmapOffsetX = bitmap.bmWidth / 2;
+                    INT bitmapOffsetY = bitmap.bmHeight / 2;
+
+                    RECT updateRectangle = {
+                        // left
+                        currentPosition.x - bitmapOffsetX,
+                        // top
+                        currentPosition.y - bitmapOffsetY,
+                        // right
+                        currentPosition.x + bitmapOffsetX + 1,
+                        // bottom
+                        currentPosition.y + bitmapOffsetY + 1
+                    };
+
+                    DeleteObject(hBitmap);
+
+                    InvalidateRect(hCanvasWnd, &updateRectangle, FALSE);
                     SendMessage(hCanvasWnd, WM_PAINT, uMsg, -1);
 
                     // The new operator allocates and initializes an 
@@ -576,7 +639,7 @@ LRESULT CALLBACK canvasWndProc(
                     // pointer to it.
                     LPWSTR tempTextBuffer = new wchar_t[sizeof(L"Select Point %i, %i")];
 
-                    wsprintfW(tempTextBuffer, L"Select Point %i, %i", pointToSelect.x, pointToSelect.y);
+                    wsprintfW(tempTextBuffer, L"Select Point %i, %i", activePosition.x, activePosition.y);
 
                     AppFunctions::TextOutput(MyObjects.Output.hObjectWnd, tempTextBuffer);
 
@@ -624,7 +687,7 @@ LRESULT CALLBACK canvasWndProc(
                 sizeof(TRACKMOUSEEVENT),
                 TME_HOVER,
                 hCanvasWnd,
-                10
+                1
             };
 
             TrackMouseEvent(&trackMouseEvent);
@@ -634,6 +697,10 @@ LRESULT CALLBACK canvasWndProc(
 
         case WM_MOUSEHOVER:
         {
+            // wParam of WM_MOUSEHOVER indicates whether various virtual keys 
+            // are down.
+            // lParam of WM_MOUSEHOVER specifies x- and y-coordinates of the 
+            // cursor.
             POINT currentPosition = {
                 GET_X_LPARAM(lParam),
                 GET_Y_LPARAM(lParam)
@@ -647,7 +714,7 @@ LRESULT CALLBACK canvasWndProc(
                 // ... the further processing is done just if the active 
                 // point flag is set additionally.
                 if (activePointFlag) {
-                    SelectionState currentSelectionState = MyDataStorage.CanvasData[activePointId].selectionState;
+                    SelectionState currentSelectionState = MyDataStorage.CanvasObjects[activePointId].selectionState;
 
                     switch (currentSelectionState) {
                         case SelectionState::Empty:
@@ -659,9 +726,38 @@ LRESULT CALLBACK canvasWndProc(
                         // selection state is reset.
                         case SelectionState::Hovering:
                         {
-                            AppFunctions::UpdateSelectionState(activePointId, SelectionState::Empty);
+                            MyDataStorage.CanvasObjects[activePointId].selectionState = SelectionState::Empty;
 
-                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            POINT previousPosition = MyDataStorage.CanvasObjects[activePointId].position;
+
+                            BITMAP bitmap;
+
+                            // Create a handle as a reference to the bitmap resource.
+                            HBITMAP hBitmap = LoadBitmap(
+                                GetModuleHandle(NULL),
+                                MAKEINTRESOURCE(IDB_BITMAP3)
+                            );
+
+                            // Bitmap data of the referenced handle is written to the buffer.
+                            GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                            INT bitmapOffsetX = bitmap.bmWidth / 2;
+                            INT bitmapOffsetY = bitmap.bmHeight / 2;
+
+                            RECT updateRectangle = {
+                                // left
+                                previousPosition.x - bitmapOffsetX,
+                                // top
+                                previousPosition.y - bitmapOffsetY,
+                                // right
+                                previousPosition.x + bitmapOffsetX + 1,
+                                // bottom
+                                previousPosition.y + bitmapOffsetY + 1
+                            };
+
+                            DeleteObject(hBitmap);
+
+                            InvalidateRect(hCanvasWnd, &updateRectangle, FALSE);
                             SendMessage(hCanvasWnd, WM_PAINT, uMsg, activePointId);
 
                             activePointId = -1;
@@ -669,7 +765,7 @@ LRESULT CALLBACK canvasWndProc(
 
                             break;
                         }
-                        // If selection state of the active point is 2 the 
+                        // If selection state of the active point is "Selected" the 
                         // further processing depends on the state 
                         // of the left mouse button: If it is down the active 
                         // point is repositioned, otherways it gets 
@@ -677,11 +773,39 @@ LRESULT CALLBACK canvasWndProc(
                         case SelectionState::Selected:
                         {
                             if (wParam == MK_LBUTTON) {
-                                MyDataStorage.CanvasData[activePointId].position.x = currentPosition.x;
-                                MyDataStorage.CanvasData[activePointId].position.y = currentPosition.y;
+                                POINT activePosition = MyDataStorage.CanvasObjects[activePointId].position;
 
-                                InvalidateRect(hCanvasWnd, NULL, FALSE);
-                                SendMessage(hCanvasWnd, WM_PAINT, NULL, -1);
+                                BITMAP bitmap;
+
+                                // Create a handle as a reference to the bitmap resource.
+                                HBITMAP hBitmap = LoadBitmap(
+                                    GetModuleHandle(NULL),
+                                    MAKEINTRESOURCE(IDB_BITMAP8)
+                                );
+
+                                // Bitmap data of the referenced handle is written to the buffer.
+                                GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                                INT bitmapOffsetX = bitmap.bmWidth / 2;
+                                INT bitmapOffsetY = bitmap.bmHeight / 2;
+
+                                RECT updateRectangle = {
+                                    // left
+                                    min(activePosition.x, currentPosition.x) - bitmapOffsetX,
+                                    // top
+                                    min(activePosition.y, currentPosition.y) - bitmapOffsetY,
+                                    // right
+                                    max(activePosition.x, currentPosition.x) + bitmapOffsetX + 1,
+                                    // bottom
+                                    max(activePosition.y, currentPosition.y) + bitmapOffsetY + 1
+                                };
+
+                                DeleteObject(hBitmap);
+
+                                MyDataStorage.CanvasObjects[activePointId].position = currentPosition;
+
+                                InvalidateRect(hCanvasWnd, &updateRectangle, FALSE);
+                                SendMessage(hCanvasWnd, WM_PAINT, uMsg, activePointId);
                             } else {
                                 activePointId = -1;
                                 activePointFlag = false;
@@ -696,18 +820,47 @@ LRESULT CALLBACK canvasWndProc(
             } else {
                 // ... the further processing depends on the selection state 
                 // of the corresponding point.
-                SelectionState currentSelectionState = MyDataStorage.CanvasData[pointId].selectionState;
+                SelectionState currentSelectionState = MyDataStorage.CanvasObjects[pointId].selectionState;
 
                 switch (currentSelectionState) {
                     case SelectionState::Empty:
                     {
                         if (wParam != MK_LBUTTON) {
-                            AppFunctions::UpdateSelectionState(pointId, SelectionState::Hovering);
-
                             activePointId = pointId;
                             activePointFlag = true;
 
-                            InvalidateRect(hCanvasWnd, NULL, FALSE);
+                            POINT activePosition = MyDataStorage.CanvasObjects[activePointId].position;
+
+                            MyDataStorage.CanvasObjects[activePointId].selectionState = SelectionState::Hovering;
+
+                            BITMAP bitmap;
+
+                            // Create a handle as a reference to the bitmap resource.
+                            HBITMAP hBitmap = LoadBitmap(
+                                GetModuleHandle(NULL),
+                                MAKEINTRESOURCE(IDB_BITMAP3)
+                            );
+
+                            // Bitmap data of the referenced handle is written to the buffer.
+                            GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+                            INT bitmapOffsetX = bitmap.bmWidth / 2;
+                            INT bitmapOffsetY = bitmap.bmHeight / 2;
+
+                            RECT updateRectangle = {
+                                // left
+                                activePosition.x - bitmapOffsetX,
+                                // top
+                                activePosition.y - bitmapOffsetY,
+                                // right
+                                activePosition.x + bitmapOffsetX + 1,
+                                // bottom
+                                activePosition.y + bitmapOffsetY + 1
+                            };
+
+                            DeleteObject(hBitmap);
+
+                            InvalidateRect(hCanvasWnd, &updateRectangle, FALSE);
                             SendMessage(hCanvasWnd, WM_PAINT, uMsg, pointId);
                         }
 

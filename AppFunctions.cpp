@@ -9,7 +9,7 @@ int activePointId = -1;
 AppFunctions::DataStorage MyDataStorage;
 
 AppFunctions::DataStorage::DataStorage() {
-    CanvasData = {};
+    CanvasObjects = {};
 };
 
 int AppFunctions::DrawBitmap(
@@ -73,7 +73,7 @@ int AppFunctions::DrawBitmap(
     return 0;
 };
 
-int AppFunctions::DrawCanvasBitmap(
+int AppFunctions::DrawCanvasObject(
     HDC hDeviceContext,
     int* objectIdArray,
     int objectIdArraySize,
@@ -87,7 +87,7 @@ int AppFunctions::DrawCanvasBitmap(
         // Get the object ID of the current element of the array and create a 
         // copy of the corresponding object.
         int objectId = objectIdArray[i];
-        AppFunctions::DataStorage::ObjectData object = MyDataStorage.CanvasData[objectId];
+        AppFunctions::DataStorage::ObjectData object = MyDataStorage.CanvasObjects[objectId];
 
         // Define the bitmap to be drawn in relation to the selection state 
         // of the object.
@@ -171,19 +171,18 @@ int AppFunctions::DrawCanvasBitmap(
     return 0;
 };
 
-// Returns point id if it is found in data storage, -1 if not.
 int AppFunctions::SearchDataStorage(POINT point) {
     
     int n, result, xValue, yValue;
 
-    n = MyDataStorage.CanvasData.size();
+    n = MyDataStorage.CanvasObjects.size();
     result = -1;
     xValue = point.x;
     yValue = point.y;
     
     if (n != 0) {
         for (int i = 0; i < n; i++) {
-            DataStorage::ObjectData elementData = MyDataStorage.CanvasData[i];
+            DataStorage::ObjectData elementData = MyDataStorage.CanvasObjects[i];
 
             int xCompare, yCompare;
 
@@ -204,11 +203,11 @@ int AppFunctions::SearchDataStorage(POINT point) {
 }
 
 void AppFunctions::ResetSelection() {
-    int n = MyDataStorage.CanvasData.size();
+    int n = MyDataStorage.CanvasObjects.size();
 
     if (n != 0) {
         for (int i = 0; i < n; i++) {
-            MyDataStorage.CanvasData[i].selectionState = SelectionState::Empty;
+            MyDataStorage.CanvasObjects[i].selectionState = SelectionState::Empty;
         }
     } else {
 
@@ -217,30 +216,30 @@ void AppFunctions::ResetSelection() {
 
 void AppFunctions::AddPoint(POINT point) {
     DataStorage::ObjectData elementData = {
-        MyDataStorage.CanvasData.size(),
+        MyDataStorage.CanvasObjects.size(),
         "POINT",
         SelectionState::Hovering,
         point
     };
 
-    MyDataStorage.CanvasData.push_back(elementData);
+    MyDataStorage.CanvasObjects.push_back(elementData);
 }
 
-void AppFunctions::UpdatePoints(HDC hDeviceContext, int objectId) {
+void AppFunctions::UpdateObjects(HDC hDeviceContext, int objectId) {
     int objectIdArraySize;
     int* objectIdArray;
 
     if (objectId == -1) {
         // Update all objects within the canvas by creating an array from all 
         // storage entries and passing it to DrawCanvasBitmap-Function.
-        objectIdArraySize = MyDataStorage.CanvasData.size();
+        objectIdArraySize = MyDataStorage.CanvasObjects.size();
         objectIdArray = new int[objectIdArraySize];
 
         for (int i = 0; i < objectIdArraySize; i++) {
-            objectIdArray[i] = MyDataStorage.CanvasData[i].id;
+            objectIdArray[i] = MyDataStorage.CanvasObjects[i].id;
         }
 
-        DrawCanvasBitmap(hDeviceContext, objectIdArray, objectIdArraySize);
+        DrawCanvasObject(hDeviceContext, objectIdArray, objectIdArraySize);
     } else {
         // Update just a single object within the canvas by creating an array 
         // from a specified storage entry and passing it to DrawCanvasBitmap-
@@ -248,9 +247,9 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int objectId) {
         objectIdArraySize = 1;
         objectIdArray = new int[objectIdArraySize];
 
-        objectIdArray[0] = MyDataStorage.CanvasData[objectId].id;
+        objectIdArray[0] = MyDataStorage.CanvasObjects[objectId].id;
 
-        DrawCanvasBitmap(hDeviceContext, objectIdArray, objectIdArraySize);
+        DrawCanvasObject(hDeviceContext, objectIdArray, objectIdArraySize);
     }
 
     delete[] objectIdArray;
@@ -258,20 +257,7 @@ void AppFunctions::UpdatePoints(HDC hDeviceContext, int objectId) {
 
 SelectionState AppFunctions::GetSelectionState(int elementId) {
 
-    return MyDataStorage.CanvasData[elementId].selectionState;
-}
-
-POINT AppFunctions::UpdateSelectionState(int elementId, SelectionState selectionState) {
-    POINT point;
-
-    MyDataStorage.CanvasData[elementId].selectionState = selectionState;
-
-    point = {
-        MyDataStorage.CanvasData[elementId].position.x,
-        MyDataStorage.CanvasData[elementId].position.y
-    };
-
-    return point;
+    return MyDataStorage.CanvasObjects[elementId].selectionState;
 }
 
 void AppFunctions::TextOutput(HWND hOutputWnd, LPWSTR tempTextBuffer) {
